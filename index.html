@@ -5480,14 +5480,12 @@ document.getElementById('wkImport').addEventListener('click',()=>document.getEle
   btnW.addEventListener('click',()=>activate('weekend'));
   auth.onAuthStateChanged(async (user)=>{
     if(!user){ if(sw) sw.hidden=true; return; }
-    let access={decompte:true,weekend:true};
+    let access={decompte:true,weekend:false}; // weekend cloisonné : fermé par défaut
     try{
-      const snap=await db.collection('users').doc(user.uid).get();
+      const snap=await db.collection('access').doc(user.uid).get();
       const d=snap.exists?snap.data():null;
-      if(d && d.access && typeof d.access==='object'){
-        access={decompte:d.access.decompte!==false, weekend:d.access.weekend!==false};
-      }
-    }catch(e){ /* défaut : accès complet */ }
+      if(d){ access={decompte:d.decompte!==false, weekend:d.weekend===true}; }
+    }catch(e){ /* défaut : décompte seul */ }
     btnD.style.display=access.decompte?'':'none';
     btnW.style.display=access.weekend?'':'none';
     if(sw) sw.hidden = !(access.decompte && access.weekend);
