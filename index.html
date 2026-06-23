@@ -2191,10 +2191,10 @@
 
 
 /* ===== Sélecteur d'onglets ASV (intégré à l'en-tête) ===== */
-.asv-nav{display:inline-flex;background:#ececed;border:1px solid #e4e4e6;border-radius:9px;padding:3px;gap:2px;margin-bottom:14px}
-.asv-nav button{font-family:'Lato',system-ui,sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.03em;border:none;background:transparent;color:#064969;padding:6px 13px;border-radius:6px;cursor:pointer;transition:all 120ms ease;white-space:nowrap}
-.asv-nav button:hover{color:#c90c0f}
-.asv-nav button.active{background:#064969;color:#fff}
+.asv-nav{display:flex;gap:4px;padding:0 0 0 8px;margin:0 0 -1px;position:relative;z-index:2;flex-wrap:wrap}
+.asv-nav button{font-family:'Lato',system-ui,sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;background:#ededf0;border:1px solid var(--color-border);border-bottom:none;border-radius:9px 9px 0 0;padding:9px 18px;color:var(--color-text-mute);cursor:pointer;transition:color 120ms ease;white-space:nowrap}
+.asv-nav button:not(.active):hover{color:var(--color-text)}
+.asv-nav button.active{background:var(--color-surface);color:var(--color-text);position:relative;z-index:2}
 .asv-nav[hidden]{display:none!important}
 .asv-module[hidden],#module-decompte[hidden]{display:none!important}
 #module-weekend{font-family:'Lato',system-ui,sans-serif;font-size:15px;line-height:1.5}
@@ -2211,7 +2211,7 @@
     --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
     --radius-md:6px; --radius-lg:10px;
     --shadow-card:0 2px 8px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.04);
-  }#module-weekend .wrap{max-width:1700px;margin:0 auto;padding:40px 40px 64px}#module-weekend .header{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:24px;box-shadow:var(--shadow-card);position:relative}#module-weekend .header-top{display:flex;justify-content:space-between;align-items:center;gap:12px 14px;flex-wrap:wrap}#module-weekend .header-left{flex:1 1 auto;min-width:0}#module-weekend .eyebrow{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:var(--color-primary);margin-bottom:8px;display:flex;align-items:center;gap:8px}#module-weekend .eyebrow::before{content:"";width:18px;height:2px;background:var(--color-primary);border-radius:1px}#module-weekend .title{font-family:var(--font);font-size:26px;font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--color-text);text-transform:uppercase;margin:0}#module-weekend .title em{font-style:normal;font-weight:300;color:var(--color-text-light);text-transform:lowercase;letter-spacing:.02em;font-size:.7em;margin-left:6px}#module-weekend .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}#module-weekend .btn{font-family:var(--font);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border:1.5px solid var(--color-border);background:var(--color-surface);color:var(--color-text);padding:11px 16px;border-radius:8px;cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:7px;min-height:42px}#module-weekend .btn:hover{border-color:var(--color-text-soft)}#module-weekend .btn.primary{background:var(--color-text);color:#fff;border-color:var(--color-text)}#module-weekend .btn.primary:hover{background:var(--color-primary);border-color:var(--color-primary);transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,12,15,.20)}#module-weekend .btn.danger:hover{border-color:var(--color-primary);color:var(--color-primary)}#module-weekend .btn svg{width:16px;height:16px;flex:0 0 auto;display:block}#module-weekend .btn.mini svg{width:14px;height:14px}#module-weekend .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-card);overflow-x:auto}#module-weekend .planning{
+  }#module-weekend .wrap{max-width:var(--container-max);margin:0 auto;padding:var(--container-pad) var(--container-pad) 64px}#module-weekend .header{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:24px;box-shadow:var(--shadow-card);position:relative}#module-weekend .header-top{display:flex;justify-content:space-between;align-items:center;gap:12px 14px;flex-wrap:wrap}#module-weekend .header-left{flex:1 1 auto;min-width:0}#module-weekend .eyebrow{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:var(--color-primary);margin-bottom:8px;display:flex;align-items:center;gap:8px}#module-weekend .eyebrow::before{content:"";width:18px;height:2px;background:var(--color-primary);border-radius:1px}#module-weekend .title{font-family:var(--font);font-size:26px;font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--color-text);text-transform:uppercase;margin:0}#module-weekend .title em{font-style:normal;font-weight:300;color:var(--color-text-light);text-transform:lowercase;letter-spacing:.02em;font-size:.7em;margin-left:6px}#module-weekend .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}#module-weekend .btn{font-family:var(--font);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border:1.5px solid var(--color-border);background:var(--color-surface);color:var(--color-text);padding:11px 16px;border-radius:8px;cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:7px;min-height:42px}#module-weekend .btn:hover{border-color:var(--color-text-soft)}#module-weekend .btn.primary{background:var(--color-text);color:#fff;border-color:var(--color-text)}#module-weekend .btn.primary:hover{background:var(--color-primary);border-color:var(--color-primary);transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,12,15,.20)}#module-weekend .btn.danger:hover{border-color:var(--color-primary);color:var(--color-primary)}#module-weekend .btn svg{width:16px;height:16px;flex:0 0 auto;display:block}#module-weekend .btn.mini svg{width:14px;height:14px}#module-weekend .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-card);overflow-x:auto}#module-weekend .planning{
     display:grid;
     grid-template-columns:44px 116px repeat(24, minmax(0,1fr));
     grid-template-rows:32px;
@@ -2231,16 +2231,16 @@
 #module-decompte .header-right{order:2;display:flex;flex-direction:row;align-items:center;gap:10px;flex-shrink:0;align-self:flex-start}
 #module-decompte .header-right .year-pills{order:0;width:auto;flex-basis:auto;justify-content:flex-end}
 /* ===== Sélecteur mois/année (essai), branché sur les vraies données ===== */
-#module-decompte .mp-trial{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#module-decompte .mp-trial{position:relative;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 #module-decompte .mp-trial-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-mute)}
 #module-decompte .mp-wrap{display:inline-flex;align-items:center;gap:6px}
-#module-decompte .mp-anchor{position:relative}
+#module-decompte .mp-anchor{position:static}
 #module-decompte .mp-arrow{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1}
 #module-decompte .mp-arrow:hover{border-color:var(--color-text-soft)}
 #module-decompte .mp-btn{display:inline-flex;align-items:center;gap:8px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;padding:6px 13px;color:var(--color-text);font-size:14px;font-weight:700;cursor:pointer}
 #module-decompte .mp-btn:hover{border-color:var(--color-text-soft)}
 #module-decompte .mp-caret{color:var(--color-text-soft);font-size:11px}
-#module-decompte .mp-popover{position:absolute;top:calc(100% + 6px);left:0;z-index:200;width:360px;max-width:86vw;background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;box-shadow:0 8px 32px rgba(6,73,105,.16);padding:14px}
+#module-decompte .mp-popover{position:absolute;top:calc(100% + 6px);left:16px;z-index:200;width:min(360px, calc(100% - 32px));background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;box-shadow:0 8px 32px rgba(6,73,105,.16);padding:14px}
 #module-decompte .mp-popover[hidden]{display:none}
 #module-decompte .mp-yearnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 #module-decompte .mp-year{font-size:16px;font-weight:900;color:var(--color-text)}
@@ -2270,6 +2270,29 @@
 #module-weekend #editToggle:hover{background:#256a4c;border-color:#256a4c;transform:none;box-shadow:none}
 #module-weekend #editToggle.primary{background:#c90c0f;color:#fff;border-color:#c90c0f}
 #module-weekend #editToggle.primary:hover{background:#a50a0d;border-color:#a50a0d;transform:none;box-shadow:none}
+/* Bouton « Terminer l'édition » du bas, en rouge comme celui du haut */
+#module-weekend #editDoneBottom{background:#c90c0f;color:#fff;border-color:#c90c0f}
+#module-weekend #editDoneBottom:hover{background:#a50a0d;border-color:#a50a0d;transform:none;box-shadow:none}
+/* En portrait/mobile : bouton Éditer en icône seule (reste sur la ligne du titre, comme le kebab) */
+@media(max-width:600px){
+  #module-weekend #editToggle span{display:none}
+  #module-weekend #editToggle{padding:8px 9px}
+  #module-weekend #editToggle svg{margin:0}
+}
+/* Aligner exactement le padding du planning sur celui du décompte (mêmes décalages haut/côtés) */
+@media(max-width:700px){ #module-weekend .wrap{padding:var(--container-pad) var(--container-pad) 48px} }
+@media(max-width:480px){ #module-weekend .wrap{padding:20px var(--container-pad) 32px} }
+/* Répliquer les réglages mobiles du décompte au planning (carte, titre, espacements, polices) */
+@media(max-width:700px){
+  #module-weekend .header{padding:24px 20px;border-radius:var(--radius-md)}
+}
+@media(max-width:480px){
+  #module-weekend .header{padding:14px 14px}
+  #module-weekend .header-top{gap:10px 8px}
+  #module-weekend .title{font-size:24px}
+  #module-weekend .title em{font-size:.65em}
+  #module-weekend .section-title{font-size:18px}
+}
 /* Force l'impression des couleurs de fond (planning + graphiques) */
 @media print{
   *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
@@ -2320,13 +2343,13 @@
 <div class="container" id="module-decompte">
 
   <!-- HEADER -->
+  <div class="asv-nav no-print">
+    <button type="button" data-target="decompte" class="active">Décompte</button>
+    <button type="button" data-target="weekend">Planning</button>
+  </div>
   <header class="header">
     <div class="header-top">
       <div class="header-left">
-        <div class="asv-nav no-print">
-          <button type="button" data-target="decompte" class="active">Décompte</button>
-          <button type="button" data-target="weekend">Planning</button>
-        </div>
         <h1 class="title">Décompte <em>des heures</em></h1>
       </div>
       <div class="header-right no-print">
@@ -2510,13 +2533,13 @@
 <div id="module-weekend" class="asv-module" hidden>
 
  <div class="wrap">
+  <div class="asv-nav no-print">
+    <button type="button" data-target="decompte">Décompte</button>
+    <button type="button" data-target="weekend" class="active">Planning</button>
+  </div>
   <header class="header">
     <div class="header-top">
       <div class="header-left">
-        <div class="asv-nav no-print">
-          <button type="button" data-target="decompte">Décompte</button>
-          <button type="button" data-target="weekend" class="active">Planning</button>
-        </div>
         <h1 class="title">Planning <em>dimanche</em></h1>
       </div>
       <div class="header-right no-print">
@@ -4094,6 +4117,9 @@ function makeExternalTooltip(list, maxIdx, minIdx) {
     const tooltip = context.tooltip;
     if (tooltip.opacity === 0) {
       tooltipEl.style.opacity = 0;
+      // Replacer en haut à gauche pour ne pas étirer la page une fois masquée
+      tooltipEl.style.top = "0px";
+      tooltipEl.style.left = "0px";
       return;
     }
 
@@ -5609,7 +5635,7 @@ function setEditMode(on){
   document.getElementById('editor').style.display=on?'block':'none';
   const tg=document.getElementById('editToggle');
   tg.classList.toggle('primary',on);
-  tg.innerHTML=on?btnHTML('check',"Terminer l'édition"):btnHTML('edit','Mode édition');
+  tg.innerHTML=on?btnHTML('check',"Terminer l'édition"):btnHTML('edit','Éditer');
   if(on)renderEditor();
 }
 document.getElementById('editToggle').addEventListener('click',()=>setEditMode(!editMode));
@@ -5622,7 +5648,7 @@ document.getElementById('importFile').addEventListener('change',e=>{
 });
 
 document.getElementById('printBtn').innerHTML=btnHTML('print','Imprimer / PDF');
-document.getElementById('editToggle').innerHTML=btnHTML('edit','Mode édition');
+document.getElementById('editToggle').innerHTML=btnHTML('edit','Éditer');
 document.getElementById('addAsvBtn').innerHTML=btnHTML('plus','Ajouter un ASV');
 document.getElementById('editDoneBottom').innerHTML=btnHTML('check',"Terminer l'édition");
 document.getElementById('editDoneBottom').addEventListener('click',()=>{ setEditMode(false); window.scrollTo({top:0,behavior:'smooth'}); });
@@ -5662,6 +5688,9 @@ document.getElementById('wkImport').addEventListener('click',()=>document.getEle
     const wk=(mod==='weekend');
     modW.hidden=!wk; modD.hidden=wk;
     setActiveTabs(mod);
+    // Neutraliser l'infobulle du graphique (sinon elle peut étirer la page après un survol/tap)
+    const tt=document.body.querySelector('div.chart-tooltip');
+    if(tt){ tt.style.opacity=0; tt.style.top='0px'; tt.style.left='0px'; }
     if(wk && !weekendStarted && window.__ASV_startWeekend){ weekendStarted=true; window.__ASV_startWeekend(); }
     if(!skipHash) setHash(wk ? '#/planning' : '#/decompte');
   }
