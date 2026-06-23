@@ -14,7 +14,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
-<title>ASV — Décompte & Planning week-end</title>
+<title>Espace ASV</title>
 
 <!-- Favicon SVG inline (data URI) — cadran d'horloge, aucun fichier externe -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23064969'/><circle cx='32' cy='32' r='20' fill='none' stroke='white' stroke-width='3'/><line x1='32' y1='32' x2='32' y2='18' stroke='white' stroke-width='3' stroke-linecap='round'/><line x1='32' y1='32' x2='44' y2='36' stroke='%23c90c0f' stroke-width='3' stroke-linecap='round'/><circle cx='32' cy='32' r='2.5' fill='white'/></svg>">
@@ -23,7 +23,7 @@
 <!-- Méta-tags iOS pour l'ajout à l'écran d'accueil (PWA-style) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Décompte heures">
+<meta name="apple-mobile-web-app-title" content="Espace ASV">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2227,9 +2227,9 @@
 <!-- ============ ÉCRAN DE LOGIN ============ -->
 <div id="loginScreen" class="login-screen" hidden>
   <div class="login-card">
-    <div class="login-eyebrow">Carnet de gardes</div>
-    <h1 class="login-title">Décompte<br><em>des heures</em></h1>
-    <p class="login-sub" id="loginSub">Connecte-toi pour accéder à tes données.</p>
+    <div class="login-eyebrow">Connexion</div>
+    <h1 class="login-title">Espace<br><em>ASV</em></h1>
+    <p class="login-sub" id="loginSub">Connecte-toi pour accéder à tes applications.</p>
 
     <form id="loginForm" class="login-form" autocomplete="on">
       <label class="login-field">
@@ -4949,7 +4949,7 @@ function setupLoginUI() {
     mode = m;
     clearMessages();
     if (m === "signin") {
-      subEl.textContent = "Connecte-toi pour accéder à tes données.";
+      subEl.textContent = "Connecte-toi pour accéder à tes applications.";
       submitBtn.textContent = "Se connecter";
       passField.hidden = false;
       passEl.required = true;
