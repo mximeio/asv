@@ -2230,19 +2230,25 @@ html{scrollbar-gutter:stable}
 #module-weekend .header-left{order:1}
 #module-weekend .header-right{order:2;flex-shrink:0;flex-direction:row;align-items:center;gap:10px;align-self:flex-start}
 /* En-tête décompte : même disposition que le planning (onglets+titre à gauche, année+kebab à droite) */
-#module-decompte .header-right{order:2;display:flex;flex-direction:row;align-items:center;gap:10px;flex-shrink:0;align-self:flex-start}
+#module-decompte .header-right{order:2;display:flex;flex-direction:row;align-items:center;gap:10px;flex-shrink:0;align-self:flex-start;position:relative}
 #module-decompte .header-right .year-pills{order:0;width:auto;flex-basis:auto;justify-content:flex-end}
 /* ===== Sélecteur mois/année (essai), branché sur les vraies données ===== */
 #module-decompte .mp-trial{position:relative;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 #module-decompte .mp-trial-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-mute)}
 #module-decompte .mp-wrap{display:inline-flex;align-items:center;gap:6px}
 #module-decompte .mp-anchor{position:static}
+#module-decompte .mp-label-short{display:none}
+@media(max-width:480px){
+  #module-decompte .mp-label-full{display:none}
+  #module-decompte .mp-label-short{display:inline}
+  #module-decompte .mp-arrow{display:none}
+}
 #module-decompte .mp-arrow{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1}
 #module-decompte .mp-arrow:hover{border-color:var(--color-text-soft)}
 #module-decompte .mp-btn{display:inline-flex;align-items:center;gap:8px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:8px;padding:6px 13px;color:var(--color-text);font-size:14px;font-weight:700;cursor:pointer}
 #module-decompte .mp-btn:hover{border-color:var(--color-text-soft)}
 #module-decompte .mp-caret{color:var(--color-text-soft);font-size:11px}
-#module-decompte .mp-popover{position:absolute;top:calc(100% + 6px);left:16px;z-index:200;width:min(360px, calc(100% - 32px));background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;box-shadow:0 8px 32px rgba(6,73,105,.16);padding:14px}
+#module-decompte .mp-popover{position:absolute;top:calc(100% + 6px);right:0;left:auto;z-index:200;width:min(360px, calc(100vw - 28px));background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;box-shadow:0 8px 32px rgba(6,73,105,.16);padding:14px}
 #module-decompte .mp-popover[hidden]{display:none}
 #module-decompte .mp-yearnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 #module-decompte .mp-year{font-size:16px;font-weight:900;color:var(--color-text)}
@@ -2258,7 +2264,7 @@ html{scrollbar-gutter:stable}
 #module-decompte .mp-cell.created.sel{background:var(--color-text);color:#fff}
 #module-decompte .mp-cell-m{font-size:11px;font-weight:700}
 #module-decompte .mp-cell-h{font-size:16px;font-weight:900;line-height:1.15}
-#module-decompte .mp-cell-h i{font-size:10px;font-weight:400;font-style:normal;opacity:.7}
+#module-decompte .mp-cell-h i{font-size:10px;font-weight:400;font-style:normal;opacity:.7;margin-left:2px}
 #module-decompte .mp-cell-g{font-size:9.5px;opacity:.7}
 #module-decompte .mp-cell-bar{display:flex;height:4px;width:calc(100% - 12px);border-radius:2px;overflow:hidden;margin-top:4px}
 #module-decompte .mp-cell-bar span{display:block;height:100%}
@@ -2355,6 +2361,14 @@ html{scrollbar-gutter:stable}
         <h1 class="title">Décompte <em>des heures</em></h1>
       </div>
       <div class="header-right no-print">
+        <div class="mp-wrap" id="mpWrap">
+          <button class="mp-arrow" id="mpPrev" type="button" aria-label="Mois précédent">‹</button>
+          <div class="mp-anchor">
+            <button class="mp-btn" id="mpBtn" type="button"><span id="mpLabel">—</span><span class="mp-caret">▾</span></button>
+            <div class="mp-popover" id="mpPopover" hidden></div>
+          </div>
+          <button class="mp-arrow" id="mpNext" type="button" aria-label="Mois suivant">›</button>
+        </div>
         <nav class="year-pills" id="yearPills" aria-label="Sélection de l'année"></nav>
         <div class="actions-menu" id="actionsMenuWrap">
           <button class="actions-trigger" id="actionsMenuBtn" aria-label="Actions" aria-haspopup="true" aria-expanded="false" type="button">
@@ -2399,19 +2413,6 @@ html{scrollbar-gutter:stable}
 
   <!-- Input file caché hors du dropdown (évite les soucis de click() sur élément hidden) -->
   <input type="file" id="fileImport" accept="application/json,.json" hidden>
-
-  <!-- SÉLECTEUR MOIS/ANNÉE (essai — coexiste avec l'existant) -->
-  <section class="mp-trial no-print" id="mpTrial">
-    <span class="mp-trial-label">Sélecteur mois (essai)</span>
-    <div class="mp-wrap" id="mpWrap">
-      <button class="mp-arrow" id="mpPrev" type="button" aria-label="Mois précédent">‹</button>
-      <div class="mp-anchor">
-        <button class="mp-btn" id="mpBtn" type="button"><span id="mpLabel">—</span><span class="mp-caret">▾</span></button>
-        <div class="mp-popover" id="mpPopover" hidden></div>
-      </div>
-      <button class="mp-arrow" id="mpNext" type="button" aria-label="Mois suivant">›</button>
-    </div>
-  </section>
 
   <!-- MONTHS -->
   <h2 class="section-title">Période <span class="num" id="periodCount">— 5 mois</span></h2>
@@ -4735,13 +4736,40 @@ function mpRenderPopover() {
     }
   }
   pop.innerHTML = `<div class="mp-yearnav"><button type="button" class="mp-ynav" data-mpyear="-1" aria-label="Année précédente">‹</button><div class="mp-year">${y}</div><button type="button" class="mp-ynav" data-mpyear="1" aria-label="Année suivante">›</button></div><div class="mp-grid">${cells}</div><div class="mp-legend"><span><span class="mp-lg-box created"></span>Mois saisi</span><span><span class="mp-lg-box empty"></span>Cliquer pour créer</span></div>`;
+  mpPosition();
+}
+function mpPosition() {
+  const pop = document.getElementById('mpPopover');
+  const btn = document.getElementById('mpBtn');
+  if (!pop || pop.hidden || !btn) return;
+  const m = 8;
+  const vw = document.documentElement.clientWidth;
+  const w = Math.min(360, vw - 2 * m);
+  pop.style.width = w + 'px';
+  const br = btn.getBoundingClientRect();
+  let left = Math.round(br.right - w);
+  left = Math.max(m, Math.min(left, vw - w - m));
+  pop.style.position = 'fixed';
+  pop.style.left = left + 'px';
+  pop.style.top = Math.round(br.bottom + 6) + 'px';
+  pop.style.right = 'auto';
 }
 function renderMonthPickerTrial() {
   const labelEl = document.getElementById('mpLabel'); if (!labelEl) return;
   const cur = state.active;
-  if (cur && yearOf(cur)) labelEl.textContent = realMonthName(cur) + ' ' + yearOf(cur);
-  else if (cur) labelEl.textContent = realMonthName(cur) + ' ' + (state.activeYear || '');
-  else labelEl.textContent = '' + (state.activeYear || new Date().getFullYear());
+  let full, short;
+  if (cur) {
+    const y = yearOf(cur) || state.activeYear || '';
+    const name = realMonthName(cur);
+    const mi = MONTHS_ALL.indexOf(name);
+    const mm = mi >= 0 ? String(mi + 1).padStart(2, '0') : '';
+    full = name + ' ' + y;
+    short = (mm ? mm + '/' : '') + y;
+  } else {
+    full = '' + (state.activeYear || new Date().getFullYear());
+    short = full;
+  }
+  labelEl.innerHTML = '<span class="mp-label-full">' + full + '</span><span class="mp-label-short">' + short + '</span>';
   if (mpPickerYear == null) mpPickerYear = state.activeYear || new Date().getFullYear();
   if (mpOpen) mpRenderPopover();
 }
@@ -4759,7 +4787,7 @@ function mpInit() {
   btn.addEventListener('click', e => {
     e.stopPropagation();
     mpOpen = !mpOpen;
-    if (mpOpen) { mpPickerYear = state.activeYear || mpPickerYear || new Date().getFullYear(); mpRenderPopover(); pop.hidden = false; }
+    if (mpOpen) { mpPickerYear = state.activeYear || mpPickerYear || new Date().getFullYear(); pop.hidden = false; mpRenderPopover(); }
     else { pop.hidden = true; }
   });
   document.addEventListener('click', e => {
