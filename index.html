@@ -2190,6 +2190,8 @@
   }
 
 
+/* Réserver en permanence l'espace de la barre de défilement (évite le décalage horizontal au changement d'onglet) */
+html{scrollbar-gutter:stable}
 /* ===== Sélecteur d'onglets ASV (intégré à l'en-tête) ===== */
 .asv-nav{display:flex;gap:4px;padding:0 0 0 8px;margin:0 0 -1px;position:relative;z-index:2;flex-wrap:wrap}
 .asv-nav button{font-family:'Lato',system-ui,sans-serif;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;background:#ededf0;border:1px solid var(--color-border);border-bottom:none;border-radius:9px 9px 0 0;padding:9px 18px;color:var(--color-text-mute);cursor:pointer;transition:color 120ms ease;white-space:nowrap}
