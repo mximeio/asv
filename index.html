@@ -2259,12 +2259,12 @@ html{scrollbar-gutter:stable}
 #module-decompte .year-tabs .year-pill:hover{color:var(--color-text)}
 #module-decompte .year-tabs .year-pill.active{background:var(--color-text);color:#fff}
 /* Bouton « Ajouter » dans l'en-tête (icône +), texte masqué en portrait */
-#module-decompte .hdr-add{display:inline-flex;align-items:center;gap:7px;background:#2E7D5B;border:1.5px solid #2E7D5B;border-radius:7px;padding:7px 11px;color:#fff;font-family:var(--font);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
-#module-decompte .hdr-add:hover{background:#256a4c;border-color:#256a4c}
+#module-decompte .hdr-add{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#064969;border:1.5px solid #064969;border-radius:7px;padding:0 12px;min-height:34px;line-height:1;box-sizing:border-box;color:#fff;font-family:var(--font);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+#module-decompte .hdr-add:hover{background:#053a54;border-color:#053a54}
 /* Kebab en carré arrondi (cohérent avec les autres boutons), au lieu du cercle */
 #module-decompte .actions-trigger,#module-weekend .actions-trigger{border-radius:8px}
 #module-decompte .hdr-add svg{width:16px;height:16px;flex:0 0 auto}
-@media(max-width:600px){ #module-decompte .hdr-add span{display:none} #module-decompte .hdr-add{padding:8px 9px} }
+@media(max-width:600px){ #module-decompte .hdr-add span{display:none} #module-decompte .hdr-add{width:36px;height:36px;padding:0;min-height:0} }
 /* Calendrier des mois : 12 par ligne sur grand écran, adaptatif en dessous */
 #module-decompte .cal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px}
 @media(min-width:1000px){ #module-decompte .cal-grid{grid-template-columns:repeat(12,1fr)} }
@@ -2298,11 +2298,11 @@ html{scrollbar-gutter:stable}
 /* Padding réduit des fenêtres modales sur smartphone */
 @media(max-width:480px){ #module-weekend .wk-modal-card{padding:20px 18px} }
 #module-decompte .mp-cell{text-align:center;padding:8px 2px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font);display:flex;flex-direction:column;align-items:center;gap:1px}
-#module-decompte .mp-cell.empty{border:1.5px dashed var(--color-text-soft);background:transparent;color:var(--color-text-soft);min-height:48px;justify-content:center}
-#module-decompte .mp-cell-plus{font-size:18px;font-weight:400;line-height:1;color:var(--color-text-soft)}
+#module-decompte .mp-cell.empty{border:1.5px dashed #b9bcc4;background:var(--color-surface);color:var(--color-primary);min-height:48px;justify-content:center}
+#module-decompte .mp-cell-plus{font-size:18px;font-weight:400;line-height:1;color:inherit}
 #module-decompte .mp-cell.empty:hover{background:#fff5f4;border-color:var(--color-primary);color:var(--color-primary)}
 #module-decompte .mp-cell.empty:hover .mp-cell-plus{color:var(--color-primary)}
-#module-decompte .mp-cell.created{background:var(--color-surface-alt);color:var(--color-text);border:1px solid var(--color-border)}
+#module-decompte .mp-cell.created{background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border)}
 #module-decompte .mp-cell.created:hover{border-color:var(--color-text);background:#e9edf1}
 #module-decompte .mp-cell.created.sel:hover{background:var(--color-text);border-color:var(--color-text)}
 #module-decompte .mp-cell.created.sel{background:var(--color-text);color:#fff;border-color:var(--color-text)}
@@ -2318,17 +2318,19 @@ html{scrollbar-gutter:stable}
 #module-decompte .mp-lg-box.created{background:var(--color-surface-alt);border:1px solid var(--color-border)}
 #module-decompte .mp-lg-box.empty{border:1.5px dashed var(--color-text-soft)}
 /* Bouton d'édition du planning : vert pour entrer, rouge pour terminer */
-#module-weekend #editToggle{background:#2E7D5B;color:#fff;border-color:#2E7D5B}
-#module-weekend #editToggle:hover{background:#256a4c;border-color:#256a4c;transform:none;box-shadow:none}
+#module-weekend #editToggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#064969;color:#fff;border:1.5px solid #064969;border-radius:7px;padding:0 12px;min-height:34px;line-height:1;box-sizing:border-box;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+#module-weekend #editToggle:hover{background:#053a54;border-color:#053a54;transform:none;box-shadow:none}
 #module-weekend #editToggle.primary{background:#c90c0f;color:#fff;border-color:#c90c0f}
 #module-weekend #editToggle.primary:hover{background:#a50a0d;border-color:#a50a0d;transform:none;box-shadow:none}
 /* Bouton « Terminer l'édition » du bas, en rouge comme celui du haut */
 #module-weekend #editDoneBottom{background:#c90c0f;color:#fff;border-color:#c90c0f}
 #module-weekend #editDoneBottom:hover{background:#a50a0d;border-color:#a50a0d;transform:none;box-shadow:none}
+/* « Ajouter un ASV » et « Terminer l'édition » sur la même ligne */
+#module-weekend .editor-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid var(--color-border)}
 /* En portrait/mobile : bouton Éditer en icône seule (reste sur la ligne du titre, comme le kebab) */
 @media(max-width:600px){
   #module-weekend #editToggle span{display:none}
-  #module-weekend #editToggle{padding:8px 9px}
+  #module-weekend #editToggle{width:36px;height:36px;padding:0;min-height:0}
   #module-weekend #editToggle svg{margin:0}
 }
 /* Aligner exactement le padding du planning sur celui du décompte (mêmes décalages haut/côtés) */
@@ -2622,8 +2624,8 @@ html{scrollbar-gutter:stable}
   <section class="editor no-print" id="editor" style="display:none">
     <h2 class="section-title">Éditer le planning</h2>
     <div id="editorList"></div>
-    <button class="btn primary" id="addAsvBtn" type="button"></button>
-    <div class="editor-footer">
+    <div class="editor-actions">
+      <button class="btn primary" id="addAsvBtn" type="button"></button>
       <button class="btn primary" id="editDoneBottom" type="button"></button>
     </div>
   </section>
@@ -5561,7 +5563,7 @@ function setEditMode(on){
   document.getElementById('editor').style.display=on?'block':'none';
   const tg=document.getElementById('editToggle');
   tg.classList.toggle('primary',on);
-  tg.innerHTML=on?btnHTML('check',"Terminer l'édition"):btnHTML('edit','Éditer');
+  tg.innerHTML=on?btnHTML('check',"Terminer"):btnHTML('edit','Éditer');
   if(on)renderEditor();
 }
 document.getElementById('editToggle').addEventListener('click',()=>setEditMode(!editMode));
@@ -5576,7 +5578,7 @@ document.getElementById('importFile').addEventListener('change',e=>{
 document.getElementById('printBtn').innerHTML=btnHTML('print','Imprimer / PDF');
 document.getElementById('editToggle').innerHTML=btnHTML('edit','Éditer');
 document.getElementById('addAsvBtn').innerHTML=btnHTML('plus','Ajouter un ASV');
-document.getElementById('editDoneBottom').innerHTML=btnHTML('check',"Terminer l'édition");
+document.getElementById('editDoneBottom').innerHTML=btnHTML('check',"Terminer");
 document.getElementById('editDoneBottom').addEventListener('click',()=>{ setEditMode(false); window.scrollTo({top:0,behavior:'smooth'}); });
 document.getElementById('postsAdd').innerHTML=btnHTML('plus','Ajouter un poste');
 
@@ -5614,9 +5616,9 @@ document.getElementById('wkImport').addEventListener('click',()=>document.getEle
     const wk=(mod==='weekend');
     modW.hidden=!wk; modD.hidden=wk;
     setActiveTabs(mod);
-    // Neutraliser l'infobulle du graphique (sinon elle peut étirer la page après un survol/tap)
+    // Retirer l'infobulle du graphique (sinon elle « fond » un instant ou étire la page au changement d'onglet ; le graphique la recrée au prochain survol)
     const tt=document.body.querySelector('div.chart-tooltip');
-    if(tt){ tt.style.opacity=0; tt.style.top='0px'; tt.style.left='0px'; }
+    if(tt) tt.remove();
     if(wk && !weekendStarted && window.__ASV_startWeekend){ weekendStarted=true; window.__ASV_startWeekend(); }
     if(!skipHash) setHash(wk ? '#/planning' : '#/decompte');
   }
