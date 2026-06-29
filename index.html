@@ -3655,7 +3655,7 @@ function renderMonths() {
       const t = monthTotals(key);
       const sel = key === state.active ? " sel" : "";
       const segs = CATS.map(c => { const v = t[c.key] || 0; const pct = t.heures > 0 ? (v / t.heures) * 100 : 0; return `<span style="width:${pct}%;background:${c.color}"></span>`; }).join("");
-      cells += `<button type="button" class="mp-cell created${sel}" data-month="${key}"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} g</span><span class="mp-cell-bar">${segs}</span></button>`;
+      cells += `<button type="button" class="mp-cell created${sel}" data-month="${key}"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
     } else {
       cells += `<button type="button" class="mp-cell empty" data-newmonth="${m}" title="${MONTHS_ALL[m]} ${year} \u2014 Ajouter ce mois"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-plus">+</span></button>`;
     }
@@ -4668,7 +4668,7 @@ function mpRenderPopover() {
       const t = monthTotals(key);
       const sel = key === state.active ? ' sel' : '';
       const segs = CATS.map(c => { const v = t[c.key] || 0; const pct = t.heures > 0 ? (v / t.heures) * 100 : 0; return `<span style="width:${pct}%;background:${c.color}"></span>`; }).join('');
-      cells += `<button type="button" class="mp-cell created${sel}" data-mpkey="${key}"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} g</span><span class="mp-cell-bar">${segs}</span></button>`;
+      cells += `<button type="button" class="mp-cell created${sel}" data-mpkey="${key}"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
     } else {
       cells += `<button type="button" class="mp-cell empty" data-mpnew="${m}" title="${MONTHS_ALL[m]} ${y} — Cliquer pour créer"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-plus">+</span></button>`;
     }
