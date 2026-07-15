@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  APP VERSION : 385   (2026-07-15)                                 ║ -->
+<!-- ║  APP VERSION : 386   (2026-07-15)                                 ║ -->
 <!-- ║                                                                  ║ -->
 <!-- ║  CACHE-BUSTING — à faire à CHAQUE mise en prod visible :          ║ -->
 <!-- ║   1. incrémente le numéro ci-dessus (380 → 381 → …) ;            ║ -->
@@ -26,8 +26,8 @@
 
 <!-- Favicon SVG inline (data URI) — cadran d'horloge, aucun fichier externe -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23064969'/><g fill='white'><ellipse cx='26' cy='22' rx='5' ry='6.5'/><ellipse cx='38' cy='22' rx='5' ry='6.5'/><ellipse cx='16' cy='31' rx='4.5' ry='6'/><ellipse cx='48' cy='31' rx='4.5' ry='6'/><path d='M32 31c-7.2 0-12.5 5.4-12.5 11.2 0 4.4 3.5 6.9 7.4 6.9 2.7 0 3.6-1.3 5.1-1.3s2.4 1.3 5.1 1.3c3.9 0 7.4-2.5 7.4-6.9C44.5 36.4 39.2 31 32 31z'/></g></svg>">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=385">
-<link rel="manifest" href="manifest.webmanifest?v=385">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=386">
+<link rel="manifest" href="manifest.webmanifest?v=386">
 <meta name="theme-color" content="#064969">
 <!-- Méta-tags iOS pour l'ajout à l'écran d'accueil (PWA-style) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -36,7 +36,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
 <!-- Firebase SDK v10.14.1 (mode compat — pas de build tool requis) -->
@@ -81,7 +81,9 @@
 
     /* Typo */
     --font: 'Lato', 'Open Sans', system-ui, -apple-system, sans-serif;
-    --font-mono: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    /* "Tout Lato" : les anciennes zones mono utilisent Lato en chiffres tabulaires
+       (la variable garde son nom pour ne pas toucher aux ~40 usages) */
+    --font-mono: 'Lato', system-ui, sans-serif;
 
     /* Layout */
     --container-max: 1700px;
@@ -2224,7 +2226,7 @@ html{scrollbar-gutter:stable}
     --color-text:#064969; --color-text-light:#555555; --color-text-mute:#888888; --color-text-soft:#aaaaaa;
     --color-border:#e4e4e6; --color-border-light:#f0f0f2;
     --font:'Lato','Open Sans',system-ui,-apple-system,sans-serif;
-    --font-mono:'Roboto Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    --font-mono:'Lato',system-ui,sans-serif;
     --radius-md:6px; --radius-lg:10px;
     --shadow-card:0 2px 8px rgba(0,0,0,0.05),0 1px 2px rgba(0,0,0,0.04);
   }#module-weekend .wrap{max-width:var(--container-max);margin:0 auto;padding:var(--container-pad) var(--container-pad) 64px}#module-weekend .header{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:22px 24px;margin-bottom:24px;box-shadow:var(--shadow-card);position:relative}#module-weekend .header-top{display:flex;justify-content:space-between;align-items:center;gap:12px 14px;flex-wrap:wrap}#module-weekend .header-left{flex:1 1 auto;min-width:0}#module-weekend .eyebrow{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;color:var(--color-primary);margin-bottom:8px;display:flex;align-items:center;gap:8px}#module-weekend .eyebrow::before{content:"";width:18px;height:2px;background:var(--color-primary);border-radius:1px}#module-weekend .title{font-family:var(--font);font-size:26px;font-weight:900;line-height:1;letter-spacing:-.01em;color:var(--color-text);text-transform:uppercase;margin:0}#module-weekend .title em{font-style:normal;font-weight:300;color:var(--color-text-light);text-transform:lowercase;letter-spacing:.02em;font-size:.7em;margin-left:6px}#module-weekend .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}#module-weekend .btn{font-family:var(--font);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;border:1.5px solid var(--color-border);background:var(--color-surface);color:var(--color-text);padding:11px 16px;border-radius:8px;cursor:pointer;transition:all 150ms ease;display:inline-flex;align-items:center;gap:7px;min-height:42px}#module-weekend .btn:hover{border-color:var(--color-text-soft)}#module-weekend .btn.primary{background:var(--color-text);color:#fff;border-color:var(--color-text)}#module-weekend .btn.primary:hover{background:var(--color-primary);border-color:var(--color-primary);transform:translateY(-1px);box-shadow:0 6px 16px rgba(201,12,15,.20)}#module-weekend .btn.danger:hover{border-color:var(--color-primary);color:var(--color-primary)}#module-weekend .btn svg{width:16px;height:16px;flex:0 0 auto;display:block}#module-weekend .btn.mini svg{width:14px;height:14px}#module-weekend .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:18px;box-shadow:var(--shadow-card);overflow-x:auto}#module-weekend .planning{
@@ -2465,6 +2467,8 @@ body.gp-open{ overflow:hidden; }
 
 /* ============ COMMENTAIRES PAR JOUR (nt-) ============ */
 :root{ --note:#2F6E9E; }
+/* Tout-Lato : chiffres tabulaires partout (largeur fixe → colonnes alignées) */
+body{ font-variant-numeric: tabular-nums lining-nums; }
 td.action-cell{ width:50px; white-space:nowrap; }
 td.action-cell .row-action{ vertical-align:middle; }
 td.action-cell .row-action + .row-action{ margin-left:6px; }
@@ -4333,7 +4337,7 @@ function renderStacked() {
         },
         y: {
           grid: { color: "#f0f0f2" },
-          ticks: { font: { family: "Roboto Mono", size: 11 }, color: "#888888", callback: v => v + "h" },
+          ticks: { font: { family: "Lato", size: 11 }, color: "#888888", callback: v => v + "h" },
           beginAtZero: true,
         }
       },
