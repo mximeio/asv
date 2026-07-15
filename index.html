@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  APP VERSION : 380   (2026-06-29)                                 ║ -->
+<!-- ║  APP VERSION : 382   (2026-07-15)                                 ║ -->
 <!-- ║                                                                  ║ -->
 <!-- ║  CACHE-BUSTING — à faire à CHAQUE mise en prod visible :          ║ -->
 <!-- ║   1. incrémente le numéro ci-dessus (380 → 381 → …) ;            ║ -->
@@ -26,8 +26,8 @@
 
 <!-- Favicon SVG inline (data URI) — cadran d'horloge, aucun fichier externe -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23064969'/><g fill='white'><ellipse cx='26' cy='22' rx='5' ry='6.5'/><ellipse cx='38' cy='22' rx='5' ry='6.5'/><ellipse cx='16' cy='31' rx='4.5' ry='6'/><ellipse cx='48' cy='31' rx='4.5' ry='6'/><path d='M32 31c-7.2 0-12.5 5.4-12.5 11.2 0 4.4 3.5 6.9 7.4 6.9 2.7 0 3.6-1.3 5.1-1.3s2.4 1.3 5.1 1.3c3.9 0 7.4-2.5 7.4-6.9C44.5 36.4 39.2 31 32 31z'/></g></svg>">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=380">
-<link rel="manifest" href="manifest.webmanifest?v=380">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=382">
+<link rel="manifest" href="manifest.webmanifest?v=382">
 <meta name="theme-color" content="#064969">
 <!-- Méta-tags iOS pour l'ajout à l'écran d'accueil (PWA-style) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2280,8 +2280,8 @@ html{scrollbar-gutter:stable}
 /* Modale « Ajouter un mois » façon calendrier */
 #modalOverlay .modal{position:relative;padding:20px}
 #module-weekend .wk-modal-card{padding:20px}
-#modalOverlay .addm-close{position:absolute;top:12px;right:12px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--color-text-soft);border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
-#modalOverlay .addm-close:hover{background:var(--color-surface-alt);color:var(--color-text)}
+#modalOverlay .addm-close, #gpOverlay .addm-close{position:absolute;top:12px;right:12px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--color-text-soft);border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
+#modalOverlay .addm-close:hover, #gpOverlay .addm-close:hover{background:var(--color-surface-alt);color:var(--color-text)}
 #modalOverlay .addm-yearnav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px}
 #modalOverlay .addm-year{font-size:18px;font-weight:900;color:var(--color-text)}
 #modalOverlay .addm-nav{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px}
@@ -2378,6 +2378,82 @@ html{scrollbar-gutter:stable}
 /* Bouton "Se déconnecter" en rouge dans le module weekend (override du scope) */
 #module-weekend .actions-item.danger{ color:var(--color-primary); }
 #module-weekend .actions-item.danger:hover{ background:rgba(201,12,15,.08); }
+
+/* ============ PRÉREMPLISSAGE GOOGLE AGENDA (gp-) ============ */
+.gp-modal{ position:relative; max-height:88vh; overflow-y:auto; overscroll-behavior:contain; width:min(640px,94vw); padding:20px; }
+body.gp-open{ overflow:hidden; }
+/* Calendrier ouvert : la fenêtre garde sa taille, le popover flotte par-dessus
+   (l'étape 2 est courte, désactiver le scroll interne est sans risque) */
+.gp-modal.dp-open{ overflow-y:visible; }
+.gp-steps{ display:flex; gap:5px; margin:10px 0 16px; }
+.gp-steps span{ height:4px; border-radius:2px; flex:1; background:var(--color-border); }
+.gp-steps span.done{ background:var(--color-bg-dark); }
+.gp-gbtn{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; border:1px solid var(--color-border); border-radius:10px; background:#fff; padding:11px; font-family:var(--font); font-size:14px; font-weight:700; color:#3c4043; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.gp-gbtn:hover{ background:#fafafa; }
+.gp-connected{ display:flex; align-items:center; gap:8px; font-size:12px; font-weight:700; color:var(--ferie); margin-top:12px; }
+.gp-cal-list{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.gp-cal-item{ display:flex; align-items:center; gap:11px; border:1px solid var(--color-border); border-radius:10px; padding:11px 12px; font-size:13.5px; font-weight:700; background:var(--color-surface-alt); cursor:pointer; font-family:var(--font); color:var(--color-text); width:100%; text-align:left; }
+.gp-cal-item.selected{ border-color:var(--color-bg-dark); background:rgba(6,73,105,.05); box-shadow:inset 0 0 0 1px var(--color-bg-dark); }
+.gp-cal-dot{ width:12px; height:12px; border-radius:4px; flex:none; }
+.gp-hint{ font-size:11.5px; color:var(--color-text-mute); line-height:1.5; margin-top:10px; }
+.gp-chips{ display:flex; flex-wrap:wrap; gap:7px; margin-top:4px; }
+.gp-chip{ font-size:12px; font-weight:700; padding:7px 12px; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-alt); color:var(--color-text-light); cursor:pointer; font-family:var(--font); }
+.gp-chip.active{ background:var(--color-bg-dark); border-color:var(--color-bg-dark); color:#fff; }
+.gp-fields{ display:flex; gap:10px; margin-top:14px; }
+.gp-field{ flex:1; }
+.gp-field label{ display:block; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.6px; color:var(--color-text-mute); margin-bottom:5px; }
+.gp-datebtn{ width:100%; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; gap:8px; border:1px solid var(--color-border); border-radius:9px; padding:9px 11px; font-family:var(--font-mono); font-size:13px; background:#fff; color:var(--color-text); cursor:pointer; }
+.gp-datebtn:hover{ border-color:var(--color-text-soft); }
+.gp-datebtn svg{ color:var(--color-text-mute); flex:none; }
+.gp-dpwrap{ position:relative; }
+.gp-dp{ position:absolute; top:calc(100% + 6px); left:0; width:280px; background:#fff; border:1px solid var(--color-border); border-radius:14px; box-shadow:0 8px 32px rgba(6,73,105,.16), 0 2px 4px rgba(0,0,0,.05); padding:14px; z-index:60; }
+.gp-dp.right{ left:auto; right:0; }
+.gp-dp-nav{ display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid var(--color-border-light); margin-bottom:10px; }
+.gp-dp-label{ font-size:14px; font-weight:900; color:var(--color-text); }
+.gp-dp-btn{ border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text); width:28px; height:28px; border-radius:8px; cursor:pointer; font-size:14px; line-height:1; }
+.gp-dp-btn:hover{ background:var(--color-surface-alt); }
+.gp-dp-head{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:4px; }
+.gp-dp-head span{ font-size:10.5px; color:var(--color-text-mute); text-align:center; font-weight:700; padding:2px 0; }
+.gp-dp-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.gp-dp-cell{ height:32px; background:transparent; border:none; border-radius:8px; font-family:var(--font); font-size:13px; color:var(--color-text); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .1s,color .1s; }
+.gp-dp-cell:hover{ background:var(--color-surface-alt); }
+.gp-dp-cell.outside{ color:var(--color-text-soft); }
+.gp-dp-cell.today{ font-weight:900; color:var(--color-primary); background:rgba(201,12,15,.07); }
+.gp-dp-cell.selected{ background:var(--color-bg-dark); color:#fff; }
+.gp-dp-cell.selected.today{ background:var(--color-primary); color:#fff; }
+.gp-dp-foot{ border-top:1px solid var(--color-border-light); margin-top:10px; padding-top:10px; display:flex; justify-content:center; }
+.gp-rules{ margin-top:16px; border:1px solid var(--color-border-light); background:var(--color-surface-alt); border-radius:10px; padding:11px 12px; font-size:12px; line-height:1.65; color:var(--color-text-light); }
+.gp-rules b{ color:var(--color-text); }
+.gp-rules code{ font-family:var(--font-mono); font-size:11px; background:#eef1f3; border-radius:4px; padding:1px 5px; color:var(--color-text); }
+.gp-check{ display:flex; align-items:flex-start; gap:9px; margin-top:14px; font-size:12.5px; color:var(--color-text-light); line-height:1.45; cursor:pointer; }
+.gp-check input{ margin-top:2px; }
+.gp-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:4px; }
+.gp-stat{ background:var(--color-surface-alt); border:1px solid var(--color-border-light); border-radius:9px; padding:8px 4px; text-align:center; }
+.gp-stat .v{ font-family:var(--font-mono); font-size:17px; font-weight:700; color:var(--color-text); }
+.gp-stat .l{ font-size:9.5px; font-weight:900; text-transform:uppercase; letter-spacing:.4px; color:var(--color-text-mute); margin-top:2px; }
+.gp-stat.ok .v{ color:var(--ferie); }
+.gp-stat.warn .v{ color:var(--jour); }
+.gp-stat.conflict .v{ color:var(--color-primary); }
+.gp-table{ width:100%; border-collapse:collapse; margin-top:12px; font-size:12px; }
+.gp-table th{ text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--color-text-mute); padding:5px 6px; border-bottom:1px solid var(--color-border); }
+.gp-table td{ padding:6.5px 6px; border-bottom:1px solid var(--color-border-light); vertical-align:middle; }
+.gp-table .d{ font-family:var(--font-mono); font-size:11.5px; white-space:nowrap; }
+.gp-table .p{ font-family:var(--font-mono); font-size:11.5px; }
+.gp-table td:last-child{ text-align:right; white-space:nowrap; }
+.gp-table tr.skipped td{ opacity:.5; }
+.gp-badge{ display:inline-block; font-size:9.5px; font-weight:900; letter-spacing:.4px; text-transform:uppercase; padding:2.5px 7px; border-radius:999px; white-space:nowrap; }
+.gp-badge.new{ background:rgba(46,125,91,.12); color:var(--ferie); }
+.gp-badge.skip{ background:#ececee; color:var(--color-text-mute); }
+.gp-badge.warn{ background:rgba(229,165,71,.16); color:#a06f1d; }
+.gp-badge.split{ background:rgba(107,78,142,.13); color:var(--admin); }
+.gp-subnote{ font-size:10.5px; color:var(--color-text-mute); margin-top:2px; white-space:normal; }
+.gp-fold{ margin-top:10px; border:1px solid var(--color-border-light); border-radius:9px; background:var(--color-surface-alt); padding:9px 11px; font-size:11.5px; color:var(--color-text-light); }
+.gp-fold b{ color:var(--color-text); font-size:12px; }
+.gp-fold ul{ margin:6px 0 0 16px; line-height:1.6; }
+.gp-loading{ text-align:center; padding:30px 0; color:var(--color-text-mute); font-size:13px; }
+.gp-setup{ font-size:12.5px; line-height:1.7; color:var(--color-text-light); }
+.gp-setup ol{ margin:8px 0 0 18px; }
+.gp-setup code{ font-family:var(--font-mono); font-size:11px; background:#eef1f3; border-radius:4px; padding:1px 5px; }
 </style>
 </head>
 
@@ -2448,6 +2524,10 @@ html{scrollbar-gutter:stable}
             <button class="actions-item" id="btnImport" type="button" role="menuitem">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <span>Importer en JSON</span>
+            </button>
+            <button class="actions-item" id="btnGPrefill" type="button" role="menuitem" hidden>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/></svg>
+              <span>Préremplir via Agenda</span>
             </button>
 
             <div class="actions-divider"></div>
@@ -2700,6 +2780,17 @@ html{scrollbar-gutter:stable}
       <button class="btn" id="modalResetCancel">Annuler</button>
       <button class="btn btn-danger-solid" id="modalResetConfirmBtn" disabled>Réinitialiser</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL : Préremplir via Google Agenda -->
+<div class="modal-overlay" id="gpOverlay">
+  <div class="modal gp-modal">
+    <button class="addm-close" id="gpCloseBtn" type="button" aria-label="Fermer">✕</button>
+    <h3 id="gpTitle">Préremplir via Google Agenda</h3>
+    <div class="gp-steps" id="gpSteps"><span></span><span></span><span></span></div>
+    <div id="gpBody"></div>
+    <div class="modal-actions" id="gpActions"></div>
   </div>
 </div>
 
@@ -5142,6 +5233,613 @@ function translateAuthError(e) {
   };
   return map[e.code] || e.message || "Erreur de connexion.";
 }
+
+// ============================================================================
+// PRÉREMPLISSAGE DEPUIS GOOGLE AGENDA
+// ----------------------------------------------------------------------------
+// Configuration : créer un client OAuth "Application Web" sur
+// https://console.cloud.google.com/apis/credentials (projet asv-application),
+// ajouter l'origine de l'appli (ex. https://asv-application.web.app) dans
+// "Origines JavaScript autorisées", activer l'API "Google Calendar API",
+// puis coller l'ID client ci-dessous (se termine par .apps.googleusercontent.com).
+// Scope lecture seule uniquement — l'appli ne peut rien écrire dans l'agenda.
+//
+// DROITS D'ACCÈS — même mécanisme que le planning week-end : l'entrée de
+// menu n'apparaît que si le document access/{uid} de l'utilisateur contient
+// le champ "agenda" à true (booléen, à poser depuis la console Firebase).
+// Les Security Rules existantes suffisent (lecture de ses propres droits).
+// ============================================================================
+const GCAL_CLIENT_ID = "905624924923-nblr5fvfve1gltraq7oqlmldgmcpbftj.apps.googleusercontent.com";
+const GCAL_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
+const GP_SHIFT_RE = /^\s*(\d{1,2})\s*[hH]\s*(\d{2})?\s*-\s*(\d{1,2})\s*[hH]\s*(\d{2})?\s*$/;
+
+const gp = {
+  step: 1, token: null, tokenClient: null, email: null,
+  calendars: [], calId: localStorage.getItem("gp_calId") || null,
+  from: null, to: null, overwrite: false, preset: "cur",
+  plan: null, busy: false, dp: null,
+};
+
+function gpISO(d) { return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function gpFmtH(h) { const hh = Math.floor(h), mm = Math.round((h - hh) * 60); return mm ? `${hh}h${String(mm).padStart(2,"0")}` : `${hh}h`; }
+function gpEsc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+function gpFmtDate(iso) { const [y, m, d] = String(iso).split("-"); return `${d}/${m}/${y}`; }
+function gpDayBefore(iso) { const d = new Date(iso + "T00:00:00"); d.setDate(d.getDate() - 1); return gpISO(d); }
+
+// ---- Calendrier personnalisé (repris du sélecteur de Patrimoine) ----
+function gpDpHtml() {
+  const { which, y, m } = gp.dp;
+  const sel = gp[which];
+  const jsFirst = new Date(y, m, 1).getDay();            // 0 = dimanche
+  const off = jsFirst === 0 ? 6 : jsFirst - 1;           // grille lundi → dimanche
+  const nd = new Date(y, m + 1, 0).getDate();
+  const prevMax = new Date(y, m, 0).getDate();
+  const total = Math.ceil((off + nd) / 7) * 7;
+  const today = gpISO(new Date());
+  let cells = "";
+  for (let i = 0; i < total; i++) {
+    let d, mm = m, yy = y, out = false;
+    if (i < off) { d = prevMax - off + i + 1; mm = m === 0 ? 11 : m - 1; yy = m === 0 ? y - 1 : y; out = true; }
+    else if (i < off + nd) { d = i - off + 1; }
+    else { d = i - off - nd + 1; mm = m === 11 ? 0 : m + 1; yy = m === 11 ? y + 1 : y; out = true; }
+    const iso = `${yy}-${String(mm + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const cls = `gp-dp-cell${out ? " outside" : ""}${iso === sel ? " selected" : ""}${iso === today ? " today" : ""}`;
+    cells += `<button type="button" class="${cls}" data-gp="dppick" data-iso="${iso}">${d}</button>`;
+  }
+  return `<div class="gp-dp${which === "to" ? " right" : ""}">
+    <div class="gp-dp-nav">
+      <button type="button" class="gp-dp-btn" data-gp="dpprev" aria-label="Mois précédent">‹</button>
+      <div class="gp-dp-label">${MONTHS_ALL[m]} ${y}</div>
+      <button type="button" class="gp-dp-btn" data-gp="dpnext" aria-label="Mois suivant">›</button>
+    </div>
+    <div class="gp-dp-head"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+    <div class="gp-dp-grid">${cells}</div>
+    <div class="gp-dp-foot"><button type="button" class="btn" style="font-size:12px;padding:6px 14px" data-gp="dptoday">Aujourd'hui</button></div>
+  </div>`;
+}
+
+// Mémorise l'état de la case "écraser" avant un re-rendu de l'étape 2
+function gpSyncStep2() {
+  const ow = document.getElementById("gpOverwrite");
+  if (ow) gp.overwrite = ow.checked;
+}
+
+// ---- Droits d'accès (champ "agenda" dans access/{uid}, comme le droit "weekend") ----
+let gpAllowed = false;
+async function gpCheckAccess(user) {
+  const btn = document.getElementById("btnGPrefill");
+  gpAllowed = false;
+  try {
+    const snap = await db.collection("access").doc(user.uid).get();
+    gpAllowed = !!(snap.exists && snap.data().agenda === true);
+  } catch (e) {
+    console.warn("Préremplissage : lecture de access/{uid} impossible", e);
+  }
+  if (btn) btn.hidden = !gpAllowed;
+}
+
+function gpOpen() {
+  if (!gpAllowed) { toast("Fonction non activée pour ce compte"); return; }
+  gp.step = 1; gp.plan = null; gp.busy = false;
+  if (!gp.from) {
+    const now = new Date();
+    gp.from = gpISO(new Date(now.getFullYear(), now.getMonth(), 1));
+    gp.to = gpISO(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  }
+  document.getElementById("gpOverlay").classList.add("show");
+  document.body.classList.add("gp-open");
+  gpRender();
+}
+function gpClose() {
+  document.getElementById("gpOverlay").classList.remove("show");
+  document.body.classList.remove("gp-open");
+}
+// Fermeture demandée par l'utilisateur : confirmer si un paramétrage est en cours
+function gpRequestClose() {
+  if (gp.step >= 2 && !confirm("Fermer la fenêtre ?\nLe paramétrage en cours (période, analyse) sera perdu.")) return;
+  gpClose();
+}
+
+// ---- Google Identity Services (chargé à la demande) ----
+function gpLoadGis() {
+  return new Promise((resolve, reject) => {
+    if (window.google && google.accounts && google.accounts.oauth2) return resolve();
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Impossible de charger Google Identity Services"));
+    document.head.appendChild(s);
+  });
+}
+
+async function gpConnect() {
+  try {
+    gp.busy = true; gpRender();
+    await gpLoadGis();
+    gp.tokenClient = gp.tokenClient || google.accounts.oauth2.initTokenClient({
+      client_id: GCAL_CLIENT_ID,
+      scope: GCAL_SCOPE,
+      callback: async (resp) => {
+        if (resp.error) { gp.busy = false; gpRender(); toast("Connexion Google refusée"); return; }
+        gp.token = resp.access_token;
+        try {
+          await gpFetchCalendars();
+        } catch (e) {
+          console.error(e); toast("Erreur de lecture des calendriers");
+        }
+        gp.busy = false; gpRender();
+      },
+    });
+    gp.tokenClient.requestAccessToken();
+  } catch (e) {
+    gp.busy = false; gpRender();
+    console.error(e); toast(e.message || "Erreur de connexion Google");
+  }
+}
+
+async function gpApi(path, params) {
+  const url = new URL("https://www.googleapis.com/calendar/v3/" + path);
+  Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+  const r = await fetch(url, { headers: { Authorization: "Bearer " + gp.token } });
+  if (!r.ok) throw new Error("API Google Calendar : erreur " + r.status);
+  return r.json();
+}
+
+async function gpFetchCalendars() {
+  const j = await gpApi("users/me/calendarList", { minAccessRole: "reader" });
+  gp.calendars = (j.items || []).map(c => ({
+    id: c.id, name: c.summaryOverride || c.summary || c.id,
+    color: c.backgroundColor || "#7986cb", primary: !!c.primary,
+  })).sort((a, b) => (b.primary - a.primary) || a.name.localeCompare(b.name, "fr"));
+  if (!gp.calendars.some(c => c.id === gp.calId)) gp.calId = null;
+  if (!gp.calId && gp.calendars.length) gp.calId = gp.calendars[0].id;
+}
+
+async function gpFetchEvents() {
+  // On remonte un jour avant la plage : un poste de la veille peut déborder après minuit
+  const timeMin = new Date(gpDayBefore(gp.from) + "T00:00:00").toISOString();
+  const end = new Date(gp.to + "T00:00:00"); end.setDate(end.getDate() + 1);
+  const timeMax = end.toISOString();
+  let items = [], pageToken = null;
+  do {
+    const p = { singleEvents: "true", orderBy: "startTime", timeMin, timeMax, maxResults: "2500", timeZone: "Europe/Paris" };
+    if (pageToken) p.pageToken = pageToken;
+    const j = await gpApi("calendars/" + encodeURIComponent(gp.calId) + "/events", p);
+    items = items.concat(j.items || []);
+    pageToken = j.nextPageToken || null;
+  } while (pageToken);
+  return items;
+}
+
+// ---- Analyse des événements → postes / admin / ignorés ----
+function gpParseEvents(items) {
+  const shifts = new Map(), admins = new Map(), ignored = [];
+  for (const ev of items) {
+    if (ev.status === "cancelled") continue;
+    const sum = (ev.summary || "").trim();
+    if (ev.start && ev.start.date) {
+      // Événement "journée entière" → poste si le titre est une plage horaire
+      const m = sum.match(GP_SHIFT_RE);
+      const key = ev.start.date;
+      if (m) {
+        // La veille du début est acceptée : son débordement après minuit sera géré au plan
+        if (key < gpDayBefore(gp.from) || key > gp.to) continue;
+        if (shifts.has(key)) { ignored.push({ date: key, sum, why: "2ᵉ poste le même jour" }); continue; }
+        shifts.set(key, { deb: +m[1] + (+(m[2] || 0)) / 60, fin: +m[3] + (+(m[4] || 0)) / 60, sum });
+      } else {
+        if (key < gp.from || key > gp.to) continue;
+        ignored.push({ date: key, sum: sum || "(sans titre)", why: "titre non reconnu" });
+      }
+    } else if (ev.start && ev.start.dateTime) {
+      const t1 = new Date(ev.start.dateTime), t2 = new Date(ev.end.dateTime);
+      const key = gpISO(t1);
+      if (key < gp.from || key > gp.to) continue;
+      if (/^administratif/i.test(sum)) {
+        const dur = Math.round(((t2 - t1) / 3600000) * 100) / 100;
+        const deb = t1.getHours() + t1.getMinutes() / 60;
+        const fin = t2.getHours() + t2.getMinutes() / 60;
+        if (admins.has(key)) {
+          const a = admins.get(key);
+          a.dur = Math.round((a.dur + dur) * 100) / 100;
+          a.deb = Math.min(a.deb, deb); a.fin = Math.max(a.fin, fin);
+        } else {
+          admins.set(key, { deb, fin, dur, sum });
+        }
+      } else {
+        ignored.push({ date: key, sum: sum || "(sans titre)", why: "pas un poste" });
+      }
+    }
+  }
+  return { shifts, admins, ignored };
+}
+
+// ---- Aides sur les mois / lignes existants ----
+function gpMonthKeyFor(year, monthIdx) {
+  return Object.keys(state.data).find(k => MONTHS_ALL.indexOf(realMonthName(k)) === monthIdx && yearOf(k) === year) || null;
+}
+function gpRowFor(monthKey, dayNum, wantTail) {
+  if (!monthKey) return null;
+  const rows = state.data[monthKey] || [];
+  const prevSet = detectPrevMonthIndices(rows);
+  for (let i = 0; i < rows.length; i++) {
+    if (String(baseDayNumber(rows[i].day)) === String(dayNum) && prevSet.has(i) === !!wantTail) return rows[i];
+  }
+  return null;
+}
+function gpRowFilled(r) { return !!r && (r.debut != null || r.fin != null || (r.admin || 0) > 0); }
+
+// ---- Essai à blanc : construit le plan sans rien écrire ----
+function gpBuildPlan(parsed) {
+  const plan = { writes: [], skips: [], monthsToCreate: [], ignored: parsed.ignored, warns: 0, adminCount: 0 };
+  const needMonth = (y, mIdx) => {
+    if (!gpMonthKeyFor(y, mIdx) && !plan.monthsToCreate.some(mc => mc.y === y && mc.mIdx === mIdx)) {
+      plan.monthsToCreate.push({ y, mIdx });
+    }
+  };
+  const dates = [...new Set([...parsed.shifts.keys(), ...parsed.admins.keys()])].sort();
+  for (const dk of dates) {
+    const [Y, M, D] = dk.split("-").map(Number);
+    const d = new Date(Y, M - 1, D);
+    const shift = parsed.shifts.get(dk) || null;
+    const admin = parsed.admins.get(dk) || null;
+    // Veille de la plage : ne retenir que le débordement du poste après minuit
+    if (dk < gp.from) {
+      if (!shift) continue;
+      const crossesB = shift.fin !== 0 && shift.fin <= shift.deb;
+      if (!crossesB) continue;
+      const next = new Date(Y, M - 1, D + 1); // = 1er jour de la plage
+      if (next.getMonth() !== d.getMonth()) {
+        // Changement de mois → seule la ligne d'appoint est concernée
+        const tEntry = { y: next.getFullYear(), mIdx: next.getMonth(), day: D, tail: true, deb: 24, fin: shift.fin,
+          admin: 0, date: d, label: "appoint 0h → " + gpFmtH(shift.fin) + " (poste de la veille)", warn: null, splitNote: null };
+        const tRow = gpRowFor(gpMonthKeyFor(tEntry.y, tEntry.mIdx), D, true);
+        if (gpRowFilled(tRow) && !gp.overwrite) plan.skips.push(tEntry);
+        else { needMonth(tEntry.y, tEntry.mIdx); plan.writes.push(tEntry); }
+      } else {
+        // Même mois : les heures d'après minuit vivent sur la ligne de la veille
+        const e2 = { y: Y, mIdx: M - 1, day: D, tail: false, deb: shift.deb, fin: shift.fin, admin: 0, date: d,
+          label: gpFmtH(shift.deb) + " → " + gpFmtH(shift.fin),
+          warn: null, splitNote: "poste de la veille inclus : il déborde après minuit sur la plage" };
+        const row2 = gpRowFor(gpMonthKeyFor(Y, M - 1), D, false);
+        if (gpRowFilled(row2) && !gp.overwrite) plan.skips.push(e2);
+        else { needMonth(Y, M - 1); plan.writes.push(e2); }
+      }
+      continue;
+    }
+    let deb, fin, warn = null, splitNote = null, tailWrite = null;
+    let label;
+    if (shift) {
+      deb = shift.deb; fin = shift.fin;
+      label = gpFmtH(shift.deb) + " → " + gpFmtH(shift.fin || 24);
+      const crosses = fin !== 0 && fin <= deb;
+      if (admin) {
+        // Contigu (ou chevauchant) le début du poste → inclus dans Début/Fin, sinon signalé
+        const effDeb = Math.min(deb, crosses ? deb : deb);
+        if (admin.fin >= effDeb - 0.26) {
+          deb = Math.min(deb, admin.deb);
+          label = gpFmtH(deb) + " → " + gpFmtH(shift.fin || 24) + " (poste + admin " + gpFmtH(admin.dur).replace("h", "h ").trim() + ")";
+        } else {
+          warn = "Admin " + gpFmtH(admin.deb) + "–" + gpFmtH(admin.fin) + " non contigu au poste : heures admin hors Début/Fin";
+        }
+      }
+      if (fin === 0) fin = 24;
+      if (crosses) {
+        const next = new Date(Y, M - 1, D + 1);
+        if (next.getMonth() !== d.getMonth()) {
+          // Poste à cheval sur deux mois → ligne principale jusqu'à minuit + ligne d'appoint
+          splitNote = "coupé : jusqu'à minuit ici + ligne d'appoint (0h → " + gpFmtH(shift.fin) + ") dans le mois suivant";
+          tailWrite = { y: next.getFullYear(), mIdx: next.getMonth(), day: D, deb: 24, fin: shift.fin };
+          fin = 24;
+        }
+      }
+    } else {
+      deb = admin.deb; fin = admin.fin;
+      label = gpFmtH(deb) + " → " + gpFmtH(fin) + " (admin seul)";
+    }
+    const adminVal = admin ? admin.dur : 0;
+    if (admin) plan.adminCount++;
+    if (warn) plan.warns++;
+
+    const mIdx = M - 1;
+    const existingKey = gpMonthKeyFor(Y, mIdx);
+    const row = gpRowFor(existingKey, D, false);
+    const entry = { y: Y, mIdx, day: D, tail: false, deb, fin, admin: adminVal, date: d, label, warn, splitNote };
+    if (gpRowFilled(row) && !gp.overwrite) {
+      plan.skips.push(entry);
+    } else {
+      needMonth(Y, mIdx);
+      plan.writes.push(entry);
+    }
+    // La ligne d'appoint est évaluée INDÉPENDAMMENT de la ligne principale :
+    // le 31 peut être déjà saisi alors que l'appoint du mois suivant manque encore.
+    if (tailWrite) {
+      const tKey = gpMonthKeyFor(tailWrite.y, tailWrite.mIdx);
+      const tRow = gpRowFor(tKey, tailWrite.day, true);
+      const tEntry = { ...tailWrite, tail: true, admin: 0, date: d, label: "appoint 0h → " + gpFmtH(tailWrite.fin), warn: null, splitNote: null };
+      if (gpRowFilled(tRow) && !gp.overwrite) plan.skips.push(tEntry);
+      else { needMonth(tailWrite.y, tailWrite.mIdx); plan.writes.push(tEntry); }
+    }
+  }
+  return plan;
+}
+
+// ---- Application du plan ----
+function gpApply() {
+  const plan = gp.plan;
+  if (!plan || !plan.writes.length) { gpClose(); return; }
+  for (const mc of plan.monthsToCreate) {
+    const name = MONTHS_ALL[mc.mIdx];
+    let key = name;
+    if (state.data[key] != null) key = `${name} ${mc.y}`;
+    state.data[key] = emptyMonthForYear(name, mc.y);
+    state.years[key] = mc.y;
+    state.order.push(key);
+  }
+  const monthsCreated = plan.monthsToCreate.length;
+  for (const w of plan.writes) {
+    const key = gpMonthKeyFor(w.y, w.mIdx);
+    if (!key) continue;
+    let row = gpRowFor(key, w.day, w.tail);
+    if (!row && w.tail) {
+      // Créer la ligne d'appoint en tête de mois (après d'éventuelles lignes du mois précédent)
+      row = emptyDay(w.day);
+      const rows = state.data[key];
+      const prevSet = detectPrevMonthIndices(rows);
+      let at = 0;
+      for (let i = 0; i < rows.length; i++) {
+        if (prevSet.has(i) && baseDayNumber(rows[i].day) <= w.day) at = i + 1; else break;
+      }
+      rows.splice(at, 0, row);
+    }
+    if (!row) continue;
+    if (gpRowFilled(row) && !gp.overwrite) continue;
+    row.debut = w.deb;
+    row.fin = w.fin;
+    if (w.admin) row.admin = w.admin;
+  }
+  recomputeAllAutoColumns();
+  // Basculer sur l'année/le mois du début de plage
+  const [fy, fm] = gp.from.split("-").map(Number);
+  const firstKey = gpMonthKeyFor(fy, fm - 1);
+  if (firstKey) { state.activeYear = fy; state.active = firstKey; }
+  renderAll();
+  saveToStorage();
+  gpClose();
+  toast(`✓ ${plan.writes.length} ligne(s) préremplie(s)` + (monthsCreated ? ` · ${monthsCreated} mois créé(s)` : ""));
+}
+
+// ---- Rendu de la modale ----
+function gpRenderSteps() {
+  const dots = document.querySelectorAll("#gpSteps span");
+  dots.forEach((s, i) => s.classList.toggle("done", i < gp.step));
+}
+
+function gpRender() {
+  gpRenderSteps();
+  const body = document.getElementById("gpBody");
+  const actions = document.getElementById("gpActions");
+  const title = document.getElementById("gpTitle");
+  // Agrandir la fenêtre quand le calendrier de dates est ouvert (sinon il serait coupé)
+  const modalEl = document.querySelector("#gpOverlay .gp-modal");
+  if (modalEl) modalEl.classList.toggle("dp-open", !!gp.dp);
+
+  if (!GCAL_CLIENT_ID) {
+    title.textContent = "Préremplir via Google Agenda";
+    body.innerHTML = `<div class="gp-setup"><b>Configuration requise (une seule fois)&nbsp;:</b>
+      <ol>
+        <li>Ouvre <code>console.cloud.google.com/apis/credentials</code> (projet <code>asv-application</code>)</li>
+        <li>Active l'API <b>Google Calendar API</b> (menu "API et services activés")</li>
+        <li>Crée un <b>ID client OAuth</b> de type "Application Web" et ajoute l'origine de l'appli dans "Origines JavaScript autorisées"</li>
+        <li>Colle l'ID client dans la constante <code>GCAL_CLIENT_ID</code> du fichier <code>index.html</code></li>
+      </ol></div>`;
+    actions.innerHTML = `<button class="btn" data-gp="close">Fermer</button>`;
+    return;
+  }
+
+  if (gp.busy) {
+    body.innerHTML = `<div class="gp-loading">Un instant…</div>`;
+    actions.innerHTML = "";
+    return;
+  }
+
+  if (gp.step === 1) {
+    title.textContent = "Préremplir via Google Agenda";
+    if (!gp.token) {
+      body.innerHTML = `
+        <button class="gp-gbtn" data-gp="connect" type="button">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Se connecter avec Google
+        </button>
+        <div class="gp-hint">Accès en <b>lecture seule</b> — l'appli ne peut rien modifier dans ton agenda. Ton choix de calendrier sera mémorisé.</div>`;
+      actions.innerHTML = `<button class="btn" data-gp="close">Annuler</button>`;
+    } else {
+      body.innerHTML = `
+        <div class="gp-connected"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Connecté à Google</div>
+        <div class="gp-cal-list">${gp.calendars.map(c => `
+          <button type="button" class="gp-cal-item ${c.id === gp.calId ? "selected" : ""}" data-gp="cal" data-cal="${gpEsc(c.id)}">
+            <span class="gp-cal-dot" style="background:${gpEsc(c.color)}"></span>${gpEsc(c.name)}
+          </button>`).join("")}</div>
+        <div class="gp-hint">Choisis le calendrier où tu notes tes heures.</div>`;
+      actions.innerHTML = `<button class="btn" data-gp="close">Annuler</button>
+        <button class="btn primary" data-gp="step2" ${gp.calId ? "" : "disabled"}>Continuer →</button>`;
+    }
+  } else if (gp.step === 2) {
+    title.textContent = "Quelle période préremplir ?";
+    body.innerHTML = `
+      <div class="gp-chips">
+        <button type="button" class="gp-chip ${gp.preset === "cur" ? "active" : ""}" data-gp="preset" data-preset="cur">Mois en cours</button>
+        <button type="button" class="gp-chip ${gp.preset === "next" ? "active" : ""}" data-gp="preset" data-preset="next">Mois prochain</button>
+        <button type="button" class="gp-chip ${gp.preset === "custom" ? "active" : ""}" data-gp="preset" data-preset="custom">Personnalisée</button>
+      </div>
+      <div class="gp-fields">
+        <div class="gp-field gp-dpwrap"><label>Du</label>
+          <button type="button" class="gp-datebtn" data-gp="dpopen" data-which="from">${gpFmtDate(gp.from)}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
+          ${gp.dp && gp.dp.which === "from" ? gpDpHtml() : ""}
+        </div>
+        <div class="gp-field gp-dpwrap"><label>Au</label>
+          <button type="button" class="gp-datebtn" data-gp="dpopen" data-which="to">${gpFmtDate(gp.to)}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
+          ${gp.dp && gp.dp.which === "to" ? gpDpHtml() : ""}
+        </div>
+      </div>
+      <div class="gp-rules"><b>Ce qui sera reconnu :</b><br>
+        • Postes : titre <code>20h-8h</code>, <code>18h-1h</code>, <code>17h30-00h30</code>… → Début / Fin<br>
+        • <code>Administratif…</code> (avec horaires) → colonne Admin<br>
+        • Ignorés : réunions, formations, congés, team building<br>
+        • La veille du début est vérifiée (poste finissant après minuit)</div>
+      <label class="gp-check"><input type="checkbox" id="gpOverwrite" ${gp.overwrite ? "checked" : ""}>
+        <span>Écraser les jours déjà remplis <span style="color:var(--color-text-mute)">(sinon ta saisie existante est toujours conservée)</span></span></label>`;
+    actions.innerHTML = `<button class="btn" data-gp="step1">← Retour</button>
+      <button class="btn primary" data-gp="analyze">Analyser →</button>`;
+  } else if (gp.step === 3) {
+    title.textContent = "Aperçu — rien n'est encore écrit";
+    const plan = gp.plan;
+    const rowsHtml = [...plan.writes, ...plan.skips]
+      .sort((a, b) => a.date - b.date || a.tail - b.tail)
+      .map(e => {
+        const isSkip = plan.skips.includes(e);
+        const wd = WEEKDAYS_SHORT[e.date.getDay()];
+        const dLabel = `${wd} ${String(e.day).padStart(2, "0")}/${String(e.date.getMonth() + 1).padStart(2, "0")}`;
+        let badge, cls = "";
+        if (isSkip) { badge = `<span class="gp-badge skip">déjà rempli</span>`; cls = "skipped"; }
+        else if (e.warn) badge = `<span class="gp-badge warn">à vérifier</span>`;
+        else if (e.tail || e.splitNote) badge = `<span class="gp-badge split">${e.tail ? "appoint" : "coupé fin de mois"}</span>`;
+        else badge = `<span class="gp-badge new">nouveau</span>`;
+        const note = e.warn || e.splitNote;
+        return `<tr class="${cls}"><td class="d">${dLabel}</td>
+          <td class="p">${gpEsc(e.label)}${note ? `<div class="gp-subnote">${gpEsc(note)}</div>` : ""}</td>
+          <td>${badge}</td></tr>`;
+      }).join("");
+    const monthsNote = plan.monthsToCreate.length
+      ? `<div class="gp-hint">Mois à créer : ${plan.monthsToCreate.map(mc => `<b>${MONTHS_ALL[mc.mIdx]} ${mc.y}</b>`).join(", ")}</div>` : "";
+    const ignoredHtml = plan.ignored.length
+      ? `<div class="gp-fold"><b>${plan.ignored.length} événement(s) ignoré(s)</b><ul>${plan.ignored.slice(0, 12).map(i =>
+          `<li>${gpEsc(i.date.slice(8, 10))}/${gpEsc(i.date.slice(5, 7))} · "${gpEsc(i.sum)}"</li>`).join("")}${plan.ignored.length > 12 ? "<li>…</li>" : ""}</ul></div>` : "";
+    body.innerHTML = `
+      <div class="gp-stats">
+        <div class="gp-stat ok"><div class="v">${plan.writes.length}</div><div class="l">à écrire</div></div>
+        <div class="gp-stat"><div class="v">${plan.adminCount}</div><div class="l">admin</div></div>
+        <div class="gp-stat conflict"><div class="v">${plan.skips.length}</div><div class="l">conservés</div></div>
+        <div class="gp-stat warn"><div class="v">${plan.ignored.length}</div><div class="l">ignorés</div></div>
+      </div>
+      ${monthsNote}
+      <table class="gp-table"><tr><th>Date</th><th>Poste</th><th></th></tr>${rowsHtml || `<tr><td colspan="3" style="text-align:center;color:var(--color-text-mute)">Aucun poste reconnu sur cette plage</td></tr>`}</table>
+      ${ignoredHtml}`;
+    actions.innerHTML = `<button class="btn" data-gp="step2back">← Retour</button>
+      <button class="btn primary" data-gp="apply" ${plan.writes.length ? "" : "disabled"}>Préremplir ${plan.writes.length} ligne(s)</button>`;
+  }
+}
+
+async function gpAnalyze() {
+  gpSyncStep2();
+  gp.dp = null;
+  if (!gp.from || !gp.to || gp.from > gp.to) { toast("Plage de dates invalide"); return; }
+  try {
+    gp.busy = true; gpRender();
+    const items = await gpFetchEvents();
+    const parsed = gpParseEvents(items);
+    gp.plan = gpBuildPlan(parsed);
+    gp.step = 3;
+  } catch (e) {
+    console.error(e);
+    toast(e.message || "Erreur pendant l'analyse");
+    if (String(e.message).includes("401")) gp.token = null, gp.step = 1;
+  }
+  gp.busy = false; gpRender();
+}
+
+function gpSetPreset(p) {
+  gpSyncStep2();
+  gp.dp = null;
+  gp.preset = p;
+  const now = new Date();
+  if (p === "cur") {
+    gp.from = gpISO(new Date(now.getFullYear(), now.getMonth(), 1));
+    gp.to = gpISO(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  } else if (p === "next") {
+    gp.from = gpISO(new Date(now.getFullYear(), now.getMonth() + 1, 1));
+    gp.to = gpISO(new Date(now.getFullYear(), now.getMonth() + 2, 0));
+  }
+  gpRender();
+}
+
+// ---- Wiring ----
+(function gpInit() {
+  auth.onAuthStateChanged((u) => {
+    if (u) gpCheckAccess(u);
+    else { gpAllowed = false; const b = document.getElementById("btnGPrefill"); if (b) b.hidden = true; }
+  });
+  const btn = document.getElementById("btnGPrefill");
+  if (btn) btn.addEventListener("click", () => {
+    const menu = document.getElementById("actionsMenu");
+    if (menu) menu.hidden = true;
+    const mb = document.getElementById("actionsMenuBtn");
+    if (mb) mb.setAttribute("aria-expanded", "false");
+    gpOpen();
+  });
+  const closeBtn = document.getElementById("gpCloseBtn");
+  if (closeBtn) closeBtn.addEventListener("click", gpRequestClose);
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !modal || !modal.classList.contains("show")) return;
+    if (gp.dp) { gpSyncStep2(); gp.dp = null; gpRender(); }
+    else gpRequestClose();
+  });
+  const modal = document.getElementById("gpOverlay");
+  if (modal) modal.addEventListener("click", (e) => {
+    // Clic sur le fond grisé → fermer (le calendrier d'abord, sinon la fenêtre)
+    if (e.target === modal) {
+      if (gp.dp) { gpSyncStep2(); gp.dp = null; gpRender(); }
+      else gpRequestClose();
+      return;
+    }
+    const t = e.target.closest("[data-gp]");
+    const a = t ? t.dataset.gp : null;
+    // Fermer le calendrier si clic en dehors de celui-ci
+    if (gp.dp && a !== "dpopen" && !e.target.closest(".gp-dp")) {
+      gpSyncStep2(); gp.dp = null; gpRender();
+    }
+    if (!t) return;
+    if (a === "close") gpRequestClose();
+    else if (a === "connect") gpConnect();
+    else if (a === "cal") { gp.calId = t.dataset.cal; localStorage.setItem("gp_calId", gp.calId); gpRender(); }
+    else if (a === "step1") { gp.step = 1; gpRender(); }
+    else if (a === "step2") { gp.step = 2; gpRender(); }
+    else if (a === "step2back") { gp.step = 2; gpRender(); }
+    else if (a === "preset") gpSetPreset(t.dataset.preset);
+    else if (a === "analyze") gpAnalyze();
+    else if (a === "apply") gpApply();
+    else if (a === "dpopen") {
+      gpSyncStep2();
+      const which = t.dataset.which;
+      if (gp.dp && gp.dp.which === which) { gp.dp = null; }
+      else {
+        const [y, m] = String(gp[which]).split("-").map(Number);
+        gp.dp = { which, y, m: m - 1 };
+      }
+      gpRender();
+    }
+    else if (a === "dpprev" || a === "dpnext") {
+      gpSyncStep2();
+      const dir = a === "dpnext" ? 1 : -1;
+      const d = new Date(gp.dp.y, gp.dp.m + dir, 1);
+      gp.dp.y = d.getFullYear(); gp.dp.m = d.getMonth();
+      gpRender();
+    }
+    else if (a === "dppick" || a === "dptoday") {
+      gpSyncStep2();
+      const iso = a === "dptoday" ? gpISO(new Date()) : t.dataset.iso;
+      gp[gp.dp.which] = iso;
+      // garder une plage cohérente
+      if (gp.from > gp.to) { if (gp.dp.which === "from") gp.to = gp.from; else gp.from = gp.to; }
+      gp.preset = "custom";
+      gp.dp = null;
+      gpRender();
+    }
+  });
+})();
 </script>
 
 <script>
