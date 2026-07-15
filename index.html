@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  APP VERSION : 387   (2026-07-15)                                 ║ -->
+<!-- ║  APP VERSION : 389   (2026-07-15)                                 ║ -->
 <!-- ║                                                                  ║ -->
 <!-- ║  CACHE-BUSTING — à faire à CHAQUE mise en prod visible :          ║ -->
 <!-- ║   1. incrémente le numéro ci-dessus (380 → 381 → …) ;            ║ -->
@@ -26,8 +26,8 @@
 
 <!-- Favicon SVG inline (data URI) — cadran d'horloge, aucun fichier externe -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23064969'/><g fill='white'><ellipse cx='26' cy='22' rx='5' ry='6.5'/><ellipse cx='38' cy='22' rx='5' ry='6.5'/><ellipse cx='16' cy='31' rx='4.5' ry='6'/><ellipse cx='48' cy='31' rx='4.5' ry='6'/><path d='M32 31c-7.2 0-12.5 5.4-12.5 11.2 0 4.4 3.5 6.9 7.4 6.9 2.7 0 3.6-1.3 5.1-1.3s2.4 1.3 5.1 1.3c3.9 0 7.4-2.5 7.4-6.9C44.5 36.4 39.2 31 32 31z'/></g></svg>">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=387">
-<link rel="manifest" href="manifest.webmanifest?v=387">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=389">
+<link rel="manifest" href="manifest.webmanifest?v=389">
 <meta name="theme-color" content="#064969">
 <!-- Méta-tags iOS pour l'ajout à l'écran d'accueil (PWA-style) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2511,6 +2511,33 @@ tr.note-edit-row td{ background:rgba(47,110,158,.05); border-bottom:1px solid va
 @media print {
   .day-note, tr.note-edit-row, .mp-badges, .sub-note { display:none !important; }
 }
+
+/* ============ BILAN ANNUEL — MODE GRAPHIQUE (ych-) ============ */
+.yearly-head{ display:flex; align-items:center; }
+.yearly-head .yearly-toggle{ flex:1; min-width:0; }
+.ych-seg{ display:inline-flex; background:var(--color-bg); border:1px solid var(--color-border); border-radius:9px; padding:3px; gap:2px; margin-right:18px; flex:none; }
+.ych-seg button{ display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; font-family:var(--font); font-size:12px; font-weight:700; color:var(--color-text-mute); padding:6px 12px; border-radius:7px; cursor:pointer; transition:all 120ms; }
+.ych-seg button.on{ background:var(--color-bg-dark); color:#fff; box-shadow:0 2px 6px rgba(6,73,105,.25); }
+.ych-chips{ padding:14px 24px 4px; }
+.ych-chips .gp-chip .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px; vertical-align:-1px; }
+.ych-wrap{ position:relative; height:320px; padding:4px 16px 8px; }
+.ych-legend{ display:flex; gap:16px; padding:0 24px 16px; font-size:11px; color:var(--color-text-mute); }
+.ych-legend b{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:-1px; }
+/* Tooltip "Détaillé" du graphique du bilan (élément distinct de .chart-tooltip) */
+.ych-tooltip{ position:absolute; background:#fff; border-radius:10px; box-shadow:0 8px 32px rgba(6,73,105,.18), 0 2px 6px rgba(0,0,0,.04); border:1px solid rgba(6,73,105,.08); padding:12px 14px; pointer-events:none; opacity:0; transition:opacity 140ms ease; width:252px; box-sizing:border-box; z-index:50; font-family:var(--font); }
+.ctt-sep{ height:1px; background:var(--color-border-light); margin:10px 0; }
+.ctt-tab{ display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; font-size:11.5px; }
+.ctt-tab > div{ display:flex; align-items:center; justify-content:space-between; color:var(--color-text-mute); }
+.ctt-tab .k{ display:inline-flex; align-items:center; }
+.ctt-tab .v{ color:var(--color-text); font-weight:700; }
+@media print {
+  #yearlyChartView, .ych-seg { display:none !important; }
+  #yearlyTable[hidden]{ display:table !important; }
+}
+@media (max-width: 700px) {
+  .ych-seg button span{ display:none; }
+  .ych-seg{ margin-right:12px; }
+}
 </style>
 </head>
 
@@ -2701,15 +2728,27 @@ tr.note-edit-row td{ background:rgba(47,110,158,.05); border-bottom:1px solid va
     </div>
   </section>
 
-  <!-- BILAN ANNUEL (repliable) -->
+  <!-- BILAN ANNUEL (repliable, vue tableau ou graphique) -->
   <section class="yearly-summary" id="yearlySummary">
-    <button class="yearly-toggle" id="yearlyToggle" aria-expanded="true">
-      <span class="yearly-toggle-icon">▸</span>
-      <span class="yearly-toggle-label">Bilan annuel</span>
-      <span class="yearly-toggle-sub" id="yearlyToggleSub">—</span>
-    </button>
+    <div class="yearly-head">
+      <button class="yearly-toggle" id="yearlyToggle" aria-expanded="true">
+        <span class="yearly-toggle-icon">▸</span>
+        <span class="yearly-toggle-label">Bilan annuel</span>
+        <span class="yearly-toggle-sub" id="yearlyToggleSub">—</span>
+      </button>
+      <div class="ych-seg no-print" id="yearlySeg">
+        <button type="button" id="ysTable">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Tableau
+        </button>
+        <button type="button" id="ysChart">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          Graphique
+        </button>
+      </div>
+    </div>
     <div class="yearly-content" id="yearlyContent">
-      <table class="yearly-table">
+      <table class="yearly-table" id="yearlyTable">
         <thead>
           <tr>
             <th>Année</th>
@@ -2723,6 +2762,11 @@ tr.note-edit-row td{ background:rgba(47,110,158,.05); border-bottom:1px solid va
         </thead>
         <tbody id="yearlyTableBody"></tbody>
       </table>
+      <div id="yearlyChartView" class="no-print" hidden>
+        <div class="gp-chips ych-chips" id="ychChips"></div>
+        <div class="ych-wrap"><canvas id="yearlyChart"></canvas></div>
+        <div class="ych-legend"><span><b style="background:#c90c0f"></b>Mois le + chargé</span><span><b style="background:#2E7D5B"></b>Mois le + calme</span></div>
+      </div>
     </div>
   </section>
 
@@ -4561,6 +4605,275 @@ function renderInsights() {
   `;
 }
 
+// ============ BILAN ANNUEL — MODE GRAPHIQUE ============
+const YCH_METRICS = [
+  { key: "heures", label: "Heures", color: "#064969", unit: "h" },
+  { key: "gardes", label: "Gardes", color: "#064969", unit: "" },
+  { key: "nuit", label: "Nuit", color: "#2D2D3E", unit: "h" },
+  { key: "dimanche", label: "Dimanches", color: "#c90c0f", unit: "h" },
+  { key: "ferie", label: "Fériés", color: "#2E7D5B", unit: "h" },
+  { key: "admin", label: "Admin", color: "#6B4E8E", unit: "h" },
+  { key: "moy", label: "Moy./garde", color: "#2F6E9E", unit: "h" },
+];
+let yearlyView = localStorage.getItem("ychView") === "chart" ? "chart" : "table";
+let ychMetricKey = localStorage.getItem("ychMetric") || "heures";
+let yearlyChartInst = null;
+
+// Weekends et fériés travaillés d'un mois (mêmes règles que analyzeYearActivity :
+// ≥1h le dimanche — débordement du samedi compris —, ≥2h un jour férié)
+function monthWorkedCounts(monthKey) {
+  const rows = state.data[monthKey] || [];
+  const year = yearOf(monthKey);
+  if (!year) return { we: 0, jf: 0 };
+  const prevSet = detectPrevMonthIndices(rows);
+  const weSet = new Set(), jfSet = new Set();
+  rows.forEach((r, i) => {
+    const heures = Number(r.heures) || 0;
+    if (heures === 0) return;
+    const isPrev = prevSet.has(i);
+    const info = getDateForRow(monthKey, year, r.day, isPrev);
+    if (!info) return;
+    const debut = Number(r.debut) || 0;
+    const fin = Number(r.fin) || 0;
+    const crosses = (debut > 0 || fin > 0) && fin < debut;
+    if (info.weekday === 0) {
+      if (heures >= 1) weSet.add(dateKey(info));
+    } else if (info.weekday === 6 && crosses && fin >= 1) {
+      const sunday = new Date(info.year, info.month, info.day + 1);
+      weSet.add(dateKey({ year: sunday.getFullYear(), month: sunday.getMonth(), day: sunday.getDate() }));
+    }
+    const holiday = getHolidayForRow(monthKey, year, r.day, isPrev);
+    if (holiday && heures >= 2) jfSet.add(dateKey(info));
+    if (crosses && fin >= 2) {
+      const tomorrow = new Date(info.year, info.month, info.day + 1);
+      const tKey = `${String(tomorrow.getMonth() + 1).padStart(2, "0")}-${String(tomorrow.getDate()).padStart(2, "0")}`;
+      if (getHolidaysForYear(tomorrow.getFullYear()).has(tKey)) jfSet.add(`${tomorrow.getFullYear()}-${tKey}`);
+    }
+  });
+  return { we: weSet.size, jf: jfSet.size };
+}
+
+// Tous les mois suivis, chronologiques, toutes années confondues
+function yearlyChartData() {
+  return sortedMonths()
+    .filter(m => yearOf(m))
+    .map(m => {
+      const t = monthTotals(m);
+      const name = realMonthName(m);
+      const abbr = name.length > 4 ? name.slice(0, 4) + "." : name;
+      const counts = monthWorkedCounts(m);
+      return { key: m, label: `${abbr} ${String(yearOf(m)).slice(2)}`, fullLabel: `${name} ${yearOf(m)}`, year: yearOf(m), t, we: counts.we, jf: counts.jf };
+    });
+}
+
+function ychValue(d, key) {
+  if (key === "gardes") return d.t.workedDays;
+  if (key === "moy") return d.t.workedDays ? +(d.t.heures / d.t.workedDays).toFixed(1) : 0;
+  return d.t[key] || 0;
+}
+
+// Tooltip "Détaillé" : mois + gardes/moyenne + valeur + Nuit/Dimanche/Férié/Admin
+function makeYearlyTooltip(data, maxIdx, minIdx, metric) {
+  return function (context) {
+    let el = document.body.querySelector("div.ych-tooltip");
+    if (!el) { el = document.createElement("div"); el.className = "ych-tooltip"; document.body.appendChild(el); }
+    const tooltip = context.tooltip;
+    if (tooltip.opacity === 0) { el.style.opacity = 0; el.style.top = "0px"; el.style.left = "0px"; return; }
+    if (tooltip.dataPoints && tooltip.dataPoints.length) {
+      const idx = tooltip.dataPoints[0].dataIndex;
+      const d = data[idx];
+      const val = ychValue(d, metric.key);
+      let pill = "";
+      if (idx === maxIdx) pill = `<span class="ctt-pill peak">Pic</span>`;
+      else if (idx === minIdx) pill = `<span class="ctt-pill low">Creux</span>`;
+      el.innerHTML = `
+        <div class="ctt-head" style="margin-bottom:0">
+          <div>
+            <div class="ctt-month">${d.fullLabel}</div>
+            <div class="ctt-gardes">${d.t.workedDays} ${d.t.workedDays > 1 ? "gardes" : "garde"} · moy. ${ychValue(d, "moy")} h</div>
+          </div>
+          <div class="ctt-head-right">
+            <div class="ctt-total">${fmtNum(val)}<span class="ctt-unit"> ${metric.unit || ""}</span></div>
+            ${pill}
+          </div>
+        </div>
+        <div class="ctt-sep"></div>
+        <div class="ctt-tab">
+          <div><span class="k"><span class="ctt-dot" style="background:#2D2D3E"></span>Nuit</span><span class="v">${fmtNum(d.t.nuit)} h</span></div>
+          <div><span class="k"><span class="ctt-dot" style="background:#c90c0f"></span>Dimanche</span><span class="v">${fmtNum(d.t.dimanche)} h</span></div>
+          <div><span class="k"><span class="ctt-dot" style="background:#2E7D5B"></span>Férié</span><span class="v">${fmtNum(d.t.ferie)} h</span></div>
+          <div><span class="k"><span class="ctt-dot" style="background:#6B4E8E"></span>Admin</span><span class="v">${fmtNum(d.t.admin)} h</span></div>
+        </div>
+        ${metric.key === "dimanche" ? `<div class="ctt-sep"></div><div class="ctt-tab"><div><span class="k"><span class="ctt-dot" style="background:#c90c0f"></span>Weekends travaillés</span><span class="v">${d.we}</span></div></div>` : ""}
+        ${metric.key === "ferie" ? `<div class="ctt-sep"></div><div class="ctt-tab"><div><span class="k"><span class="ctt-dot" style="background:#2E7D5B"></span>Fériés travaillés</span><span class="v">${d.jf}</span></div></div>` : ""}`;
+    }
+    // Positionnement au-dessus du point, recadré dans le viewport
+    const canvasRect = context.chart.canvas.getBoundingClientRect();
+    const ptX = canvasRect.left + tooltip.caretX;
+    const ptY = canvasRect.top + tooltip.caretY;
+    const ttW = el.offsetWidth || 252, ttH = el.offsetHeight || 150;
+    const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight, margin = 12;
+    let left = ptX - ttW / 2;
+    if (left < margin) left = margin;
+    if (left + ttW > vw - margin) left = vw - ttW - margin;
+    let top = ptY - ttH - 14;
+    if (top < margin) top = ptY + 14;
+    if (top + ttH > vh - margin) top = Math.max(margin, vh - ttH - margin);
+    el.style.left = (left + window.scrollX) + "px";
+    el.style.top = (top + window.scrollY) + "px";
+    el.style.opacity = 1;
+  };
+}
+
+function renderYearlyChart() {
+  const canvas = document.getElementById("yearlyChart");
+  if (!canvas) return;
+  const data = yearlyChartData();
+  if (yearlyChartInst) { yearlyChartInst.destroy(); yearlyChartInst = null; }
+  if (data.length === 0) return;
+  const metric = YCH_METRICS.find(mm => mm.key === ychMetricKey) || YCH_METRICS[0];
+  const vals = data.map(d => ychValue(d, metric.key));
+  let maxIdx = 0, minIdx = 0;
+  vals.forEach((v, i) => { if (v > vals[maxIdx]) maxIdx = i; if (v < vals[minIdx]) minIdx = i; });
+  const pc = vals.map((_, i) => i === maxIdx ? "#c90c0f" : i === minIdx ? "#2E7D5B" : metric.color);
+  const pr = vals.map((_, i) => (i === maxIdx || i === minIdx) ? 6 : 3.5);
+
+  // Ratios annuels weekends/fériés travaillés (dénominateurs bornés pour
+  // l'année en cours) — affichés dans l'étiquette de bande sur ces filtres
+  const showRatio = metric.key === "dimanche" || metric.key === "ferie";
+  const actByYear = {};
+  if (showRatio) {
+    [...new Set(data.map(d => d.year))].forEach(y => { actByYear[y] = analyzeYearActivity(y); });
+  }
+
+  // Fond alterné par année + étiquette de l'année au changement
+  const yearBands = {
+    id: "ychYearBands",
+    beforeDraw(c) {
+      const { ctx, chartArea: a, scales: { x } } = c;
+      if (!a || data.length === 0) return;
+      const half = x.width / data.length / 2;
+      let start = 0;
+      ctx.save();
+      for (let i = 1; i <= data.length; i++) {
+        if (i === data.length || data[i].year !== data[start].year) {
+          const x1 = x.getPixelForValue(start) - half;
+          const x2 = x.getPixelForValue(i - 1) + half;
+          if (data[start].year % 2 === 0) { ctx.fillStyle = "rgba(6,73,105,.035)"; ctx.fillRect(x1, a.top, x2 - x1, a.bottom - a.top); }
+          const year = data[start].year;
+          let lbl = String(year);
+          if (showRatio && actByYear[year]) {
+            const act = actByYear[year];
+            lbl += metric.key === "dimanche"
+              ? ` · ${act.weekendsWorked}/${act.weekendsTotal} we`
+              : ` · ${act.holidaysWorked}/${act.holidaysTotal} JF`;
+          }
+          ctx.fillStyle = showRatio ? metric.color : "#8899a6";
+          ctx.font = "900 10px Lato"; ctx.textAlign = "left";
+          ctx.fillText(lbl, Math.max(x1 + 6, a.left + 6), a.top + 12);
+          start = i;
+        }
+      }
+      ctx.restore();
+    }
+  };
+
+  // Ligne de moyenne globale (tous les mois suivis), pointillée
+  const avg = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+  const globalAvgLine = {
+    id: "ychGlobalAvg",
+    afterDatasetsDraw(c) {
+      const { ctx, chartArea: a, scales: { y } } = c;
+      if (!a || avg === 0) return;
+      const py = y.getPixelForValue(avg);
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = "#c90c0f";
+      ctx.globalAlpha = 0.55;
+      ctx.lineWidth = 1.2;
+      ctx.moveTo(a.left, py);
+      ctx.lineTo(a.right, py);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 0.9;
+      ctx.font = "700 9.5px Lato";
+      ctx.fillStyle = "#c90c0f";
+      ctx.textAlign = "right";
+      ctx.fillText(`moy. ${fmtNum(avg.toFixed(1))}${metric.unit || ""}`, a.right - 6, py - 7);
+      ctx.restore();
+    }
+  };
+
+  yearlyChartInst = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels: data.map(d => d.label),
+      datasets: [{
+        data: vals,
+        borderColor: metric.color,
+        borderWidth: 2.5,
+        tension: 0.25,
+        fill: true,
+        backgroundColor: (c) => {
+          const { ctx, chartArea: a } = c.chart;
+          if (!a) return "rgba(6,73,105,.06)";
+          const g = ctx.createLinearGradient(0, a.top, 0, a.bottom);
+          g.addColorStop(0, metric.color + "33");
+          g.addColorStop(1, metric.color + "05");
+          return g;
+        },
+        pointBackgroundColor: pc,
+        pointBorderColor: "#fff",
+        pointBorderWidth: 1.5,
+        pointRadius: pr,
+        pointHoverRadius: 7,
+        pointHoverBackgroundColor: pc,
+        pointHoverBorderColor: "#fff",
+        pointHoverBorderWidth: 2,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 18, right: 8, left: 2 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false, external: makeYearlyTooltip(data, maxIdx, minIdx, metric) },
+      },
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        y: { beginAtZero: true, grid: { color: "#f0f0f2" }, ticks: { font: { family: "Lato", size: 11 }, color: "#888888", callback: v => v + (metric.unit || "") } },
+        x: { grid: { display: false }, ticks: { font: { family: "Lato", size: 10 }, color: "#888888", maxRotation: 45, minRotation: 45 } },
+      },
+    },
+    plugins: [yearBands, globalAvgLine],
+  });
+}
+
+function renderYchChips() {
+  const el = document.getElementById("ychChips");
+  if (!el) return;
+  el.innerHTML = YCH_METRICS.map(mm =>
+    `<button type="button" class="gp-chip ${mm.key === ychMetricKey ? "active" : ""}" data-ych="${mm.key}"><span class="dot" style="background:${mm.color}"></span>${mm.label}</button>`
+  ).join("");
+}
+
+function applyYearlyView() {
+  const table = document.getElementById("yearlyTable");
+  const chartView = document.getElementById("yearlyChartView");
+  const bTable = document.getElementById("ysTable");
+  const bChart = document.getElementById("ysChart");
+  if (!table || !chartView) return;
+  const isChart = yearlyView === "chart";
+  table.hidden = isChart;
+  chartView.hidden = !isChart;
+  if (bTable) bTable.classList.toggle("on", !isChart);
+  if (bChart) bChart.classList.toggle("on", isChart);
+  if (isChart) { renderYchChips(); renderYearlyChart(); }
+  requestAnimationFrame(syncPanelHeights);
+}
+
 // ============ INTERACTIONS ============
 function selectMonth(m) {
   state.active = m;
@@ -5127,6 +5440,9 @@ function renderYearlySummary() {
     `;
   }).join("");
 
+  // Maintenir la vue choisie (tableau/graphique) à chaque re-rendu
+  applyYearlyView();
+
   // Toute la ligne devient cliquable pour basculer sur cette année
   tbody.querySelectorAll("tr[data-go-year]").forEach(tr => {
     tr.addEventListener("click", () => selectYear(parseInt(tr.dataset.goYear, 10)));
@@ -5303,7 +5619,29 @@ function syncPanelHeights() {
     const expanded = yearlyToggle.getAttribute("aria-expanded") === "true";
     yearlyToggle.setAttribute("aria-expanded", String(!expanded));
     yearlyContent.hidden = expanded;
+    if (!expanded) applyYearlyView();
     requestAnimationFrame(syncPanelHeights);
+  });
+
+  // Bilan annuel : bascule tableau / graphique + choix de la mesure
+  document.getElementById("ysTable").addEventListener("click", () => {
+    yearlyView = "table";
+    localStorage.setItem("ychView", "table");
+    applyYearlyView();
+  });
+  document.getElementById("ysChart").addEventListener("click", () => {
+    yearlyView = "chart";
+    localStorage.setItem("ychView", "chart");
+    if (yearlyToggle.getAttribute("aria-expanded") !== "true") yearlyToggle.click();
+    applyYearlyView();
+  });
+  document.getElementById("ychChips").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ych]");
+    if (!b) return;
+    ychMetricKey = b.dataset.ych;
+    localStorage.setItem("ychMetric", ychMetricKey);
+    renderYchChips();
+    renderYearlyChart();
   });
 
   // Re-synchroniser les hauteurs au redimensionnement
