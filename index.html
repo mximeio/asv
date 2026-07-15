@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  APP VERSION : 386   (2026-07-15)                                 ║ -->
+<!-- ║  APP VERSION : 387   (2026-07-15)                                 ║ -->
 <!-- ║                                                                  ║ -->
 <!-- ║  CACHE-BUSTING — à faire à CHAQUE mise en prod visible :          ║ -->
 <!-- ║   1. incrémente le numéro ci-dessus (380 → 381 → …) ;            ║ -->
@@ -26,8 +26,8 @@
 
 <!-- Favicon SVG inline (data URI) — cadran d'horloge, aucun fichier externe -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23064969'/><g fill='white'><ellipse cx='26' cy='22' rx='5' ry='6.5'/><ellipse cx='38' cy='22' rx='5' ry='6.5'/><ellipse cx='16' cy='31' rx='4.5' ry='6'/><ellipse cx='48' cy='31' rx='4.5' ry='6'/><path d='M32 31c-7.2 0-12.5 5.4-12.5 11.2 0 4.4 3.5 6.9 7.4 6.9 2.7 0 3.6-1.3 5.1-1.3s2.4 1.3 5.1 1.3c3.9 0 7.4-2.5 7.4-6.9C44.5 36.4 39.2 31 32 31z'/></g></svg>">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=386">
-<link rel="manifest" href="manifest.webmanifest?v=386">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=387">
+<link rel="manifest" href="manifest.webmanifest?v=387">
 <meta name="theme-color" content="#064969">
 <!-- Méta-tags iOS pour l'ajout à l'écran d'accueil (PWA-style) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3358,9 +3358,27 @@ function countSundaysInYear(year) {
   return count;
 }
 
+// Dimanches de l'année écoulés jusqu'à une date limite incluse
+function countSundaysUpTo(year, limitDate) {
+  let count = 0;
+  const d = new Date(year, 0, 1);
+  while (d.getDay() !== 0) d.setDate(d.getDate() + 1);
+  while (d.getFullYear() === year && d <= limitDate) {
+    count++;
+    d.setDate(d.getDate() + 7);
+  }
+  return count;
+}
+
+// "15 juillet" — pour afficher la borne des dénominateurs
+function fmtDayMonth(d) {
+  return `${d.getDate() === 1 ? "1er" : d.getDate()} ${MONTHS_ALL[d.getMonth()].toLowerCase()}`;
+}
+
 function analyzeYearActivity(year) {
   const weekendSet = new Set();
   const holidaySet = new Set();
+  let lastWorkedKey = null; // dernière date (AAAA-MM-JJ) avec des heures saisies
   for (const monthKey of months()) {
     const rows = state.data[monthKey] || [];
     const monthYear = yearOf(monthKey);
@@ -3372,6 +3390,8 @@ function analyzeYearActivity(year) {
       const isPrev = prevSet.has(i);
       const info = getDateForRow(monthKey, monthYear, r.day, isPrev);
       if (!info || info.year !== year) return;
+      const dkRow = dateKey(info);
+      if (!lastWorkedKey || dkRow > lastWorkedKey) lastWorkedKey = dkRow;
       const debut = Number(r.debut) || 0;
       const fin = Number(r.fin) || 0;
       const crosses = (debut > 0 || fin > 0) && fin < debut;
@@ -3402,11 +3422,29 @@ function analyzeYearActivity(year) {
       }
     });
   }
+  // Dénominateurs : année entière pour les années passées ; pour l'année
+  // calendaire EN COURS, on borne au dernier jour avec des heures saisies
+  // (weekends/fériés écoulés entre le 1er janvier et cette date).
+  let weekendsTotal = countSundaysInYear(year);
+  let holidaysTotal = getHolidaysForYear(year).size;
+  let bound = null;
+  if (year === new Date().getFullYear() && lastWorkedKey) {
+    // Garde-fou : un poste débordant après minuit peut compter un dimanche
+    // ou un férié à J+1 — la borne s'étend pour garantir numérateur ⊆ dénominateur.
+    let boundKey = lastWorkedKey;
+    for (const k of weekendSet) if (k > boundKey) boundKey = k;
+    for (const k of holidaySet) if (k > boundKey) boundKey = k;
+    const [by, bm, bd] = boundKey.split("-").map(Number);
+    bound = new Date(by, bm - 1, bd);
+    weekendsTotal = countSundaysUpTo(year, bound);
+    holidaysTotal = [...getHolidaysForYear(year).keys()].filter(md => `${year}-${md}` <= boundKey).length;
+  }
   return {
     weekendsWorked: weekendSet.size,
-    weekendsTotal: countSundaysInYear(year),
+    weekendsTotal,
     holidaysWorked: holidaySet.size,
-    holidaysTotal: getHolidaysForYear(year).size,
+    holidaysTotal,
+    bound,
   };
 }
 
@@ -3754,12 +3792,12 @@ function renderGlobal() {
     <div class="stat">
       <div class="stat-label">Part de weekends</div>
       <div class="stat-value">${pctWeekends.toFixed(0)}<span class="unit">%</span></div>
-      <div class="stat-sub">${act.weekendsWorked} / ${act.weekendsTotal} weekends travaillés</div>
+      <div class="stat-sub">${act.weekendsWorked} / ${act.weekendsTotal} weekends${act.bound ? ` · au ${fmtDayMonth(act.bound)}` : " travaillés"}</div>
     </div>
     <div class="stat">
       <div class="stat-label">Part de jours fériés</div>
       <div class="stat-value">${pctFeries.toFixed(0)}<span class="unit">%</span></div>
-      <div class="stat-sub">${act.holidaysWorked} / ${act.holidaysTotal} fériés travaillés</div>
+      <div class="stat-sub">${act.holidaysWorked} / ${act.holidaysTotal} fériés${act.bound ? ` · au ${fmtDayMonth(act.bound)}` : " travaillés"}</div>
     </div>
   `;
 }
@@ -4508,7 +4546,7 @@ function renderInsights() {
       <div class="insight-bar-track">
         <div class="insight-bar-fill wk" style="width: ${pctWeekends}%"></div>
       </div>
-      <div class="insight-bar-sub">soit ${pctWeekends.toFixed(0)} % des weekends de ${state.activeYear}</div>
+      <div class="insight-bar-sub">soit ${pctWeekends.toFixed(0)} % des weekends ${act.bound ? `du 1er janvier au ${fmtDayMonth(act.bound)}` : `de ${state.activeYear}`}</div>
     </div>
     <div class="insight-bar">
       <div class="insight-bar-head">
@@ -4518,7 +4556,7 @@ function renderInsights() {
       <div class="insight-bar-track">
         <div class="insight-bar-fill ho" style="width: ${pctFeries}%"></div>
       </div>
-      <div class="insight-bar-sub">soit ${pctFeries.toFixed(0)} % des fériés de ${state.activeYear}</div>
+      <div class="insight-bar-sub">soit ${pctFeries.toFixed(0)} % des fériés ${act.bound ? `du 1er janvier au ${fmtDayMonth(act.bound)}` : `de ${state.activeYear}`}</div>
     </div>
   `;
 }
