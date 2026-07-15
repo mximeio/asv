@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- ╔══════════════════════════════════════════════════════════════════╗ -->
-<!-- ║  APP VERSION : 382   (2026-07-15)                                 ║ -->
+<!-- ║  APP VERSION : 384   (2026-07-15)                                 ║ -->
 <!-- ║                                                                  ║ -->
 <!-- ║  CACHE-BUSTING — à faire à CHAQUE mise en prod visible :          ║ -->
 <!-- ║   1. incrémente le numéro ci-dessus (380 → 381 → …) ;            ║ -->
@@ -26,8 +26,8 @@
 
 <!-- Favicon SVG inline (data URI) — cadran d'horloge, aucun fichier externe -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23064969'/><g fill='white'><ellipse cx='26' cy='22' rx='5' ry='6.5'/><ellipse cx='38' cy='22' rx='5' ry='6.5'/><ellipse cx='16' cy='31' rx='4.5' ry='6'/><ellipse cx='48' cy='31' rx='4.5' ry='6'/><path d='M32 31c-7.2 0-12.5 5.4-12.5 11.2 0 4.4 3.5 6.9 7.4 6.9 2.7 0 3.6-1.3 5.1-1.3s2.4 1.3 5.1 1.3c3.9 0 7.4-2.5 7.4-6.9C44.5 36.4 39.2 31 32 31z'/></g></svg>">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=382">
-<link rel="manifest" href="manifest.webmanifest?v=382">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=384">
+<link rel="manifest" href="manifest.webmanifest?v=384">
 <meta name="theme-color" content="#064969">
 <!-- Méta-tags iOS pour l'ajout à l'écran d'accueil (PWA-style) -->
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -926,6 +926,13 @@
   tr.bis:hover .row-action.remove { opacity: 1; }
   tr.invalid-day .row-action.remove { opacity: 0.7; }
   tr.invalid-day:hover .row-action.remove { opacity: 1; }
+  /* Écrans tactiles (pas de survol possible) : les actions de ligne
+     doivent être visibles en permanence, sinon + et × sont introuvables */
+  @media (hover: none) {
+    .row-action { opacity: 0.55; }
+    tr.bis .row-action.remove,
+    tr.invalid-day .row-action.remove { opacity: 0.85; }
+  }
 
   /* ============ SYNTHÈSE — total + breakdown ============ */
   .month-summary { padding: 18px 24px 22px; }
@@ -2280,8 +2287,9 @@ html{scrollbar-gutter:stable}
 /* Modale « Ajouter un mois » façon calendrier */
 #modalOverlay .modal{position:relative;padding:20px}
 #module-weekend .wk-modal-card{padding:20px}
-#modalOverlay .addm-close, #gpOverlay .addm-close{position:absolute;top:12px;right:12px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--color-text-soft);border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
-#modalOverlay .addm-close:hover, #gpOverlay .addm-close:hover{background:var(--color-surface-alt);color:var(--color-text)}
+#modalOverlay .addm-close, #gpOverlay .addm-close, #noteOverlay .addm-close{position:absolute;top:12px;right:12px;width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border:none;background:transparent;color:var(--color-text-soft);border-radius:8px;cursor:pointer;font-size:16px;line-height:1}
+#modalOverlay .addm-close:hover, #gpOverlay .addm-close:hover, #noteOverlay .addm-close:hover{background:var(--color-surface-alt);color:var(--color-text)}
+#noteOverlay .modal{position:relative;padding:20px}
 #modalOverlay .addm-yearnav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px}
 #modalOverlay .addm-year{font-size:18px;font-weight:900;color:var(--color-text)}
 #modalOverlay .addm-nav{border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px}
@@ -2454,6 +2462,51 @@ body.gp-open{ overflow:hidden; }
 .gp-setup{ font-size:12.5px; line-height:1.7; color:var(--color-text-light); }
 .gp-setup ol{ margin:8px 0 0 18px; }
 .gp-setup code{ font-family:var(--font-mono); font-size:11px; background:#eef1f3; border-radius:4px; padding:1px 5px; }
+
+/* ============ COMMENTAIRES PAR JOUR (nt-) ============ */
+:root{ --note:#2F6E9E; }
+td.action-cell{ width:50px; white-space:nowrap; }
+td.action-cell .row-action{ vertical-align:middle; }
+td.action-cell .row-action + .row-action{ margin-left:6px; }
+.row-action svg{ display:block; }
+.row-action.note-on{ opacity:.85; color:var(--note); }
+tbody tr:hover .row-action.note-on{ color:#fff; background:var(--note); border-color:var(--note); }
+.day-note{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--note); margin-left:6px; vertical-align:1px; }
+.sub-note{ color:var(--note); font-weight:700; }
+.sub-pill{ display:inline-flex; align-items:center; gap:3px; font-weight:900; font-size:11px; height:18px; line-height:1; padding:0 8px; border-radius:999px; vertical-align:middle; cursor:default; }
+.sub-pill svg{ display:block; }
+.sub-pill.warn{ color:var(--color-primary); background:rgba(201,12,15,.08); }
+.sub-pill.note{ color:var(--note); background:rgba(47,110,158,.10); }
+/* Compteur du panneau "À vérifier" en mode pastilles doubles */
+.verify-count.pills{ background:transparent; padding:0; min-width:0; display:inline-flex; gap:6px; vertical-align:middle; }
+tr.note-edit-row td{ background:rgba(47,110,158,.05); border-bottom:1px solid var(--color-border); padding:10px 12px 12px; }
+.note-editor{ text-align:left; }
+.note-editor label{ font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.6px; color:var(--note); display:block; margin-bottom:6px; }
+.note-editor textarea{ width:100%; box-sizing:border-box; min-height:52px; border:1px solid var(--color-border); border-radius:9px; padding:9px 11px; font-family:var(--font); font-size:13px; color:var(--color-text); resize:vertical; background:#fff; }
+.note-editor textarea:focus{ outline:none; border-color:var(--note); }
+.note-editor-actions{ display:flex; gap:8px; justify-content:flex-end; align-items:center; margin-top:8px; }
+.note-count{ font-size:10.5px; color:var(--color-text-mute); margin-right:auto; font-family:var(--font-mono); }
+.btn-nt{ font-family:var(--font); font-size:12px; font-weight:700; padding:7px 13px; border-radius:8px; border:1px solid var(--color-border); background:#fff; color:var(--color-text); cursor:pointer; }
+.btn-nt:hover{ border-color:var(--color-text-soft); }
+.btn-nt.primary{ background:var(--color-bg-dark); border-color:var(--color-bg-dark); color:#fff; }
+.btn-nt.danger{ color:var(--color-primary); }
+/* Panneau À vérifier : deux familles */
+.verify-fam{ padding:8px 24px 2px; font-size:11px; color:var(--color-text-mute); }
+.verify-fam .fa{ color:var(--color-primary); font-weight:700; }
+.verify-fam .fn{ color:var(--note); font-weight:700; }
+.verify-item{ box-shadow:inset 3px 0 0 rgba(201,12,15,.5); }
+.verify-item.is-note{ box-shadow:inset 3px 0 0 var(--note); }
+.verify-item .v-comment{ font-style:italic; color:var(--color-text); }
+/* Badges flottants sur les cards de mois (variante A) */
+#module-decompte .cal-grid{ padding-top:8px; }
+#module-decompte .mp-cell{ position:relative; }
+.mp-badges{ position:absolute; top:-8px; right:-5px; display:flex; gap:4px; z-index:2; }
+.mp-bdg{ display:inline-flex; align-items:center; gap:2px; color:#fff; font-size:9.5px; font-weight:900; border-radius:999px; padding:2px 6px; font-family:var(--font); line-height:1.2; }
+.mp-bdg.warn{ background:var(--color-primary); box-shadow:0 2px 6px rgba(201,12,15,.35); }
+.mp-bdg.note{ background:var(--note); box-shadow:0 2px 6px rgba(47,110,158,.35); }
+@media print {
+  .day-note, tr.note-edit-row, .mp-badges, .sub-note { display:none !important; }
+}
 </style>
 </head>
 
@@ -2779,6 +2832,23 @@ body.gp-open{ overflow:hidden; }
     <div class="modal-actions">
       <button class="btn" id="modalResetCancel">Annuler</button>
       <button class="btn btn-danger-solid" id="modalResetConfirmBtn" disabled>Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : Commentaire du jour -->
+<div class="modal-overlay" id="noteOverlay">
+  <div class="modal">
+    <button class="addm-close" id="noteCloseBtn" type="button" aria-label="Fermer">✕</button>
+    <h3 id="noteTitle">Commentaire</h3>
+    <div class="note-editor" style="margin-top:14px">
+      <textarea id="noteTextarea" maxlength="200" placeholder="Ex. : vérifier l'heure de fin, échange de garde…"></textarea>
+      <div class="note-editor-actions">
+        <span class="note-count" id="noteCharCount">0/200</span>
+        <button class="btn-nt danger" id="noteDeleteBtn" type="button">Supprimer</button>
+        <button class="btn-nt" id="noteCancelBtn" type="button">Annuler</button>
+        <button class="btn-nt primary" id="noteSaveBtn" type="button">Enregistrer</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3734,6 +3804,97 @@ function cssEscapeMonth(m) {
   return m.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "-").replace(/[^A-Za-z0-9-_]/g, "");
 }
 
+// ============ COMMENTAIRES PAR JOUR ============
+let noteEditIdx = null; // index de la ligne éditée dans la modale commentaire
+
+function rowNote(r) { return r && r.note != null ? String(r.note).trim() : ""; }
+
+// Icônes SVG (style lucide, cohérentes avec le reste de l'appli)
+function noteIcon(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+}
+function warnIcon(size) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 20h16a2 2 0 0 0 1.73-2Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
+}
+
+// Sous-titre du tableau, format compact : "31 lignes · valeurs en heures · ⚠ 2 · 🗨 1"
+function tableSubHtml(rows) {
+  let warns = 0, notes = 0;
+  for (const r of rows) { if (getRowIssues(r)) warns++; if (rowNote(r)) notes++; }
+  let s = `${rows.length} lignes · valeurs en heures`;
+  if (warns) s += ` · <span class="sub-pill warn" title="${warns} anomalie${warns > 1 ? "s" : ""} à vérifier — détail dans le panneau À vérifier">${warnIcon(10)} ${warns}</span>`;
+  if (notes) s += ` · <span class="sub-pill note" title="${notes} commentaire${notes > 1 ? "s" : ""}">${noteIcon(10)} ${notes}</span>`;
+  return s;
+}
+
+function openNoteModal(idx) {
+  const m = state.active;
+  if (!m || !state.data[m] || !state.data[m][idx]) return;
+  noteEditIdx = idx;
+  const rows = state.data[m];
+  const r = rows[idx];
+  const prevSet = detectPrevMonthIndices(rows);
+  const wd = getWeekdayForRow(m, yearOf(m), r.day, prevSet.has(idx));
+  const wdLabel = wd !== null ? WEEKDAYS_SHORT[wd] + " " : "";
+  document.getElementById("noteTitle").textContent = `Commentaire — ${wdLabel}${r.day} ${realMonthName(m).toLowerCase()}`;
+  const ta = document.getElementById("noteTextarea");
+  ta.value = rowNote(r);
+  document.getElementById("noteCharCount").textContent = `${ta.value.length}/200`;
+  document.getElementById("noteDeleteBtn").hidden = !rowNote(r);
+  document.getElementById("noteOverlay").classList.add("show");
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+}
+
+function closeNoteModal() {
+  noteEditIdx = null;
+  document.getElementById("noteOverlay").classList.remove("show");
+}
+
+(function noteInit() {
+  const ov = document.getElementById("noteOverlay");
+  if (!ov) return;
+  document.getElementById("noteCloseBtn").addEventListener("click", closeNoteModal);
+  document.getElementById("noteCancelBtn").addEventListener("click", closeNoteModal);
+  document.getElementById("noteSaveBtn").addEventListener("click", () => saveNoteFromEditor());
+  document.getElementById("noteDeleteBtn").addEventListener("click", () => saveNoteFromEditor(""));
+  ov.addEventListener("click", (e) => { if (e.target === ov) closeNoteModal(); });
+  const ta = document.getElementById("noteTextarea");
+  ta.addEventListener("input", () => {
+    document.getElementById("noteCharCount").textContent = `${ta.value.length}/200`;
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && ov.classList.contains("show")) closeNoteModal();
+  });
+})();
+
+// Compteurs {warns, notes} d'un mois, pour les badges des cards
+function monthFlags(key) {
+  const rows = state.data[key] || [];
+  let warns = 0, notes = 0;
+  rows.forEach(r => {
+    if (getRowIssues(r)) warns++;
+    if (rowNote(r)) notes++;
+  });
+  return { warns, notes };
+}
+
+function saveNoteFromEditor(txtOverride) {
+  const m = state.active;
+  const idx = noteEditIdx;
+  if (m == null || idx == null || !state.data[m] || !state.data[m][idx]) { closeNoteModal(); return; }
+  const ta = document.getElementById("noteTextarea");
+  const txt = (txtOverride !== undefined ? txtOverride : (ta ? ta.value : "")).trim().slice(0, 200);
+  const r = state.data[m][idx];
+  const had = !!rowNote(r);
+  if (txt) r.note = txt; else delete r.note;
+  closeNoteModal();
+  renderTable();
+  renderMonths();
+  saveToStorage();
+  toast(txt ? "Commentaire enregistré" : (had ? "Commentaire supprimé" : "Commentaire vide — rien à enregistrer"));
+}
+
 function renderMonths() {
   const el = document.getElementById("months");
   const year = state.activeYear;
@@ -3746,7 +3907,11 @@ function renderMonths() {
       const t = monthTotals(key);
       const sel = key === state.active ? " sel" : "";
       const segs = CATS.map(c => { const v = t[c.key] || 0; const pct = t.heures > 0 ? (v / t.heures) * 100 : 0; return `<span style="width:${pct}%;background:${c.color}"></span>`; }).join("");
-      cells += `<button type="button" class="mp-cell created${sel}" data-month="${key}"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
+      const fl = monthFlags(key);
+      const badges = (fl.warns || fl.notes)
+        ? `<span class="mp-badges">${fl.warns ? `<span class="mp-bdg warn" title="${fl.warns} anomalie${fl.warns>1?"s":""} à vérifier">${warnIcon(9)} ${fl.warns}</span>` : ""}${fl.notes ? `<span class="mp-bdg note" title="${fl.notes} commentaire${fl.notes>1?"s":""}">${noteIcon(9)} ${fl.notes}</span>` : ""}</span>`
+        : "";
+      cells += `<button type="button" class="mp-cell created${sel}" data-month="${key}">${badges}<span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
     } else {
       cells += `<button type="button" class="mp-cell empty" data-newmonth="${m}" title="${MONTHS_ALL[m]} ${year} \u2014 Ajouter ce mois"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-plus">+</span></button>`;
     }
@@ -3819,6 +3984,7 @@ function renderTable() {
   const prevSet = detectPrevMonthIndices(rows);
   const prevShort = prevMonthShort(m);
   let warnCount = 0;
+  let noteCount = 0;
   tbody.innerHTML = rows.map((r, i) => {
     const isEmpty = !r.heures;
     const isBis = /\s(bis|ter|quater|quinquies|sexies|septies|octies|nonies|\(\d+\))$/i.test(r.day);
@@ -3835,21 +4001,25 @@ function renderTable() {
     const warnTitle = issues ? describeIssues(issues, r).replace(/"/g, "&quot;") : "";
     const classes = [isEmpty ? "empty" : "", isBis ? "bis" : "", isPrev ? "prev-month" : "", isInvalid ? "invalid-day" : "", ferieClass, wdClass].filter(Boolean).join(" ");
     const baseDay = baseDayNumber(r.day);
+    const noteVal = rowNote(r);
+    if (noteVal) noteCount++;
+    const noteBtn = `<button class="row-action note-btn${noteVal ? " note-on" : ""}" data-action="note" data-idx="${i}" title="${noteVal ? noteVal.replace(/"/g, "&quot;") : "Ajouter un commentaire"}">${noteIcon(12)}</button>`;
     const actionCell = isBis
-      ? `<td class="action-cell"><button class="row-action remove" data-action="remove" data-idx="${i}" title="Supprimer cette garde">×</button></td>`
+      ? `<td class="action-cell">${noteBtn}<button class="row-action remove" data-action="remove" data-idx="${i}" title="Supprimer cette garde">×</button></td>`
       : isInvalid
-        ? `<td class="action-cell"><button class="row-action remove" data-action="remove" data-idx="${i}" title="Supprimer cette ligne (jour inexistant)">×</button></td>`
-        : `<td class="action-cell"><button class="row-action" data-action="add-bis" data-base="${baseDay}" title="Ajouter une garde le même jour">+</button></td>`;
+        ? `<td class="action-cell">${noteBtn}<button class="row-action remove" data-action="remove" data-idx="${i}" title="Supprimer cette ligne (jour inexistant)">×</button></td>`
+        : `<td class="action-cell">${noteBtn}<button class="row-action" data-action="add-bis" data-base="${baseDay}" title="Ajouter une garde le même jour">+</button></td>`;
 
     const prevTag = isPrev && prevShort ? `<span class="day-prev">${prevShort}</span>` : "";
     const invalidTag = isInvalid ? `<span class="day-invalid" title="Jour inexistant dans ce mois">⚠</span>` : "";
     const holidayTag = holiday ? `<span class="day-holiday" title="${holiday}" aria-label="Jour férié : ${holiday}"></span>` : "";
     const dstInfo = getDSTInfo(m, year, r.day, isPrev, r.debut, r.fin);
     const dstTag = dstInfo ? `<span class="day-dst" title="Changement d'heure ce jour : ${dstInfo.label}">🕐 ${dstInfo.label}</span>` : "";
+    const noteTag = noteVal ? `<span class="day-note" title="${noteVal.replace(/"/g, "&quot;")}"></span>` : "";
 
     return `
       <tr class="${classes}" data-idx="${i}">
-        <td><div class="day-cell"><span class="day-num">${r.day}</span>${wdLabel ? `<span class="day-wd">${wdLabel}</span>` : ''}${prevTag}${invalidTag}${holidayTag}${dstTag}</div></td>
+        <td><div class="day-cell"><span class="day-num">${r.day}</span>${wdLabel ? `<span class="day-wd">${wdLabel}</span>` : ''}${prevTag}${invalidTag}${holidayTag}${noteTag}${dstTag}</div></td>
         <td><input class="cell-input" type="number" step="0.25" data-field="debut" value="${r.debut ?? ''}" placeholder="—"></td>
         <td><input class="cell-input" type="number" step="0.25" data-field="fin"   value="${r.fin   ?? ''}" placeholder="—"></td>
         <td class="${r.heures ? 'has-value':''} ${warnClass}"><input class="cell-input computed" type="text" data-field="heures" value="${fmt(r.heures)}" placeholder="—" readonly title="${warnTitle || "Calculé automatiquement depuis Début et Fin"}"></td>
@@ -3889,16 +4059,14 @@ function renderTable() {
         addBisRow(parseInt(btn.dataset.base, 10));
       } else if (action === "remove") {
         removeRow(parseInt(btn.dataset.idx, 10));
+      } else if (action === "note") {
+        openNoteModal(parseInt(btn.dataset.idx, 10));
       }
     });
   });
 
   // Mise à jour du sous-titre avec compteur d'anomalies
-  let subText = `${rows.length} lignes · valeurs en heures`;
-  if (warnCount > 0) {
-    subText += ` · <span class="sub-warn">⚠ ${warnCount} à vérifier</span>`;
-  }
-  document.getElementById("tableSub").innerHTML = subText;
+  document.getElementById("tableSub").innerHTML = tableSubHtml(rows);
 
   renderVerify();
 }
@@ -3913,14 +4081,18 @@ function renderVerify() {
   const year = yearOf(m);
   const prevSet = detectPrevMonthIndices(rows);
 
+  // Une seule liste, triée par jour croissant (l'ordre des lignes du tableau) :
+  // anomalies (⚠) et commentaires (💬) mélangés — l'anomalie d'abord si même jour.
   const items = [];
   rows.forEach((r, i) => {
     const issues = getRowIssues(r);
-    if (!issues) return;
+    const noteTxt = rowNote(r);
+    if (!issues && !noteTxt) return;
     const isPrev = prevSet.has(i);
     const wd = getWeekdayForRow(m, year, r.day, isPrev);
     const wdLabel = wd !== null ? WEEKDAYS_SHORT[wd] : "";
-    items.push({ idx: i, day: r.day, wdLabel, r, issues });
+    if (issues) items.push({ kind: "issue", idx: i, day: r.day, wdLabel, r, issues });
+    if (noteTxt) items.push({ kind: "note", idx: i, day: r.day, wdLabel, r, note: noteTxt });
   });
 
   if (items.length === 0) {
@@ -3928,11 +4100,12 @@ function renderVerify() {
     panel.hidden = false;
     const countEl = document.getElementById("verifyCount");
     countEl.textContent = "0";
+    countEl.classList.remove("pills");
     countEl.classList.add("ok");
     document.getElementById("verifyList").innerHTML = `
       <div class="verify-empty">
         <div class="verify-empty-circle" aria-hidden="true">✓</div>
-        <div class="verify-empty-text">Aucune anomalie détectée</div>
+        <div class="verify-empty-text">Aucune anomalie ni commentaire</div>
       </div>
     `;
     requestAnimationFrame(syncPanelHeights);
@@ -3940,10 +4113,24 @@ function renderVerify() {
   }
 
   panel.hidden = false;
+  const nbIssues = items.filter(it => it.kind === "issue").length;
+  const nbNotes = items.length - nbIssues;
   const countEl = document.getElementById("verifyCount");
-  countEl.textContent = items.length;
   countEl.classList.remove("ok");
+  countEl.classList.add("pills");
+  countEl.innerHTML =
+    (nbIssues ? `<span class="sub-pill warn" title="${nbIssues} anomalie${nbIssues > 1 ? "s" : ""}">${warnIcon(10)} ${nbIssues}</span>` : "") +
+    (nbNotes ? `<span class="sub-pill note" title="${nbNotes} commentaire${nbNotes > 1 ? "s" : ""}">${noteIcon(10)} ${nbNotes}</span>` : "");
   document.getElementById("verifyList").innerHTML = items.map(it => {
+    if (it.kind === "note") {
+      return `
+      <button class="verify-item is-note" data-idx="${it.idx}" type="button">
+        <div class="v-day">${it.r.day} <span class="wd">${it.wdLabel}</span></div>
+        <div class="v-detail"><span class="v-comment">${noteIcon(12)} « ${it.note.replace(/</g, "&lt;")} »</span></div>
+        <div class="v-arrow">›</div>
+      </button>
+      `;
+    }
     const r = it.r;
     const heures = Number(r.heures) || 0;
     const nuit = Number(r.nuit) || 0;
@@ -3956,7 +4143,7 @@ function renderVerify() {
       <button class="verify-item" data-idx="${it.idx}" type="button">
         <div class="v-day">${r.day} <span class="wd">${it.wdLabel}</span></div>
         <div class="v-detail">
-          ${detailParts.join(" · ")}
+          <span style="color:var(--color-primary)">${warnIcon(12)}</span> ${detailParts.join(" · ")}
           <br><span class="v-note">${desc}</span>
         </div>
         <div class="v-arrow">›</div>
@@ -4444,13 +4631,7 @@ function onCellChange(e) {
 
   // Recompter et mettre à jour le sous-titre du panel tableau
   const allRows = state.data[state.active];
-  let warnCount = 0;
-  for (const r of allRows) { if (getRowIssues(r)) warnCount++; }
-  let subText = `${allRows.length} lignes · valeurs en heures`;
-  if (warnCount > 0) {
-    subText += ` · <span class="sub-warn">⚠ ${warnCount} à vérifier</span>`;
-  }
-  document.getElementById("tableSub").innerHTML = subText;
+  document.getElementById("tableSub").innerHTML = tableSubHtml(allRows);
 
   renderVerify();
 
