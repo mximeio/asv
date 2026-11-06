@@ -712,6 +712,67 @@ function pickClosestMonth() {
   return best;
 }
 
+// ============ CONTRÔLE DES DONNÉES (sécurité, 06/11/2026) ============
+// Un fichier importé pouvait porter du HTML dans le jour, les heures, le nom du mois ou
+// l'année ; une fois enregistré, il s'exécutait à chaque ouverture. Et une année en lettres
+// faisait tourner countSundaysInYear sans fin. Formes acceptées : celles que l'appli produit.
+const MONTH_KEY_RE = new RegExp("^(" + MONTHS_ALL.join("|") + ")( \\d{4})?$");
+const DAY_RE = new RegExp("^\\d{1,2}( (" + BIS_SUFFIXES.join("|") + ")| \\(\\d{1,2}\\))?$");
+const ROW_NUM_FIELDS = ["debut", "fin", "admin", "heures", "nuit", "jour", "dimanche", "ferie"];
+function isYearOk(y) { return Number.isInteger(y) && y >= 2000 && y <= 2100; }
+function isNumOrNull(v) { return v == null || (typeof v === "number" && Number.isFinite(v)); }
+function isPlainObj(o) { return !!o && typeof o === "object" && !Array.isArray(o); }
+
+// Import : liste des problèmes (vide si le fichier est conforme). Ne modifie rien.
+function decompteProblems(d) {
+  const pb = [];
+  if (!isPlainObj(d) || !isPlainObj(d.data)) return ["aucune donnée lisible"];
+  for (const k of Object.keys(d.data)) {
+    const nom = String(k).slice(0, 30);
+    if (!MONTH_KEY_RE.test(k)) { pb.push(`mois « ${nom} »`); continue; }
+    const rows = d.data[k];
+    if (!Array.isArray(rows)) { pb.push(`${nom} : lignes illisibles`); continue; }
+    rows.forEach((r, i) => {
+      if (!isPlainObj(r)) { pb.push(`${nom}, ligne ${i + 1}`); return; }
+      if (!DAY_RE.test(String(r.day))) pb.push(`${nom}, jour « ${String(r.day).slice(0, 20)} »`);
+      for (const f of ROW_NUM_FIELDS) if (!isNumOrNull(r[f])) pb.push(`${nom}, ligne ${i + 1}, ${f}`);
+      if (r.note != null && (typeof r.note !== "string" || r.note.length > 200)) pb.push(`${nom}, ligne ${i + 1}, commentaire`);
+    });
+  }
+  if (!Array.isArray(d.order) || !d.order.every(k => typeof k === "string")) pb.push("ordre des mois");
+  if (!isPlainObj(d.years)) pb.push("années");
+  else for (const [k, y] of Object.entries(d.years)) if (!isYearOk(y)) pb.push(`année de « ${String(k).slice(0, 30)} »`);
+  if (d.activeYear != null && !isYearOk(d.activeYear)) pb.push("année affichée");
+  return pb;
+}
+
+// Chargement : écarte ce qui sort des formes attendues, sans refuser le compte entier.
+// Rend le nombre de valeurs écartées (0 pour des données produites par l'appli).
+function sanitizeLoadedState() {
+  let n = 0;
+  if (!isPlainObj(state.data)) { state.data = {}; n++; }
+  for (const k of Object.keys(state.data)) {
+    if (!MONTH_KEY_RE.test(k) || !Array.isArray(state.data[k])) { delete state.data[k]; n++; continue; }
+    const rows = state.data[k];
+    const kept = rows.filter(r => isPlainObj(r) && DAY_RE.test(String(r.day)));
+    n += rows.length - kept.length;
+    for (const r of kept) {
+      for (const f of ROW_NUM_FIELDS) if (!isNumOrNull(r[f])) { r[f] = null; n++; }
+      if (r.note != null && typeof r.note !== "string") { delete r.note; n++; }
+      else if (typeof r.note === "string" && r.note.length > 200) { r.note = r.note.slice(0, 200); n++; }
+    }
+    state.data[k] = kept;
+  }
+  if (!isPlainObj(state.years)) { state.years = {}; n++; }
+  for (const [k, y] of Object.entries(state.years)) if (!isYearOk(y)) { delete state.years[k]; n++; }
+  if (state.activeYear != null && !isYearOk(state.activeYear)) { state.activeYear = null; n++; }
+  if (!Array.isArray(state.order)) { state.order = Object.keys(state.data); n++; }
+  const ord = state.order.filter(k => typeof k === "string" && state.data[k]);
+  n += state.order.length - ord.length;
+  state.order = ord;
+  return n;
+}
+
 // ============ STORAGE ============
 async function loadFromStorage() {
   const ref = userDocRef();
@@ -755,6 +816,9 @@ async function loadFromStorage() {
     // Toast plus long pour les erreurs critiques
     toastError(`⚠ Chargement impossible — ${code ? code + " : " : ""}${msg}`);
   }
+
+  const ecartees = sanitizeLoadedState();
+  if (ecartees > 0) toastError(`⚠ ${ecartees} valeur${ecartees > 1 ? "s" : ""} illisible${ecartees > 1 ? "s" : ""} écartée${ecartees > 1 ? "s" : ""} de tes données`);
 
   // À l'ouverture : choisir l'année à afficher + le bon mois dans cette année.
   // Règle :
@@ -897,7 +961,7 @@ function renderGlobal() {
   const el = document.getElementById("globalStats");
 
   if (nbMonths === 0) {
-    el.innerHTML = `<div class="stat" style="grid-column: 1 / -1"><div class="stat-label">Aucun mois pour ${state.activeYear}</div><div class="stat-value">—</div><div class="stat-sub">cliquez sur "+ Ajouter un mois" pour commencer</div></div>`;
+    el.innerHTML = `<div class="stat" style="grid-column: 1 / -1"><div class="stat-label">Aucun mois pour ${gpEsc(state.activeYear)}</div><div class="stat-value">—</div><div class="stat-sub">cliquez sur "+ Ajouter un mois" pour commencer</div></div>`;
     return;
   }
 
@@ -909,7 +973,7 @@ function renderGlobal() {
 
   el.innerHTML = `
     <div class="stat">
-      <div class="stat-label">Moyenne ${state.activeYear}</div>
+      <div class="stat-label">Moyenne ${gpEsc(state.activeYear)}</div>
       <div class="stat-value">${fmtNum(moyMensuelle.toFixed(1))}<span class="unit">h</span></div>
       <div class="stat-sub">${fmtNum(t.heures)}h sur ${nbMonths} mois</div>
     </div>
@@ -942,7 +1006,7 @@ function renderYearPills() {
 
   let html = years.map(y => {
     const active = y === state.activeYear ? "active" : "";
-    return `<button class="year-pill ${active}" data-year="${y}" type="button">${y}</button>`;
+    return `<button class="year-pill ${active}" data-year="${gpEsc(y)}" type="button">${gpEsc(y)}</button>`;
   }).join("");
   el.innerHTML = html;
 
@@ -1082,7 +1146,7 @@ function renderMonths() {
       const badges = (fl.warns || fl.notes)
         ? `<span class="mp-badges">${fl.warns ? `<span class="mp-bdg warn" title="${fl.warns} anomalie${fl.warns>1?"s":""} à vérifier">${warnIcon(9)} ${fl.warns}</span>` : ""}${fl.notes ? `<span class="mp-bdg note" title="${fl.notes} commentaire${fl.notes>1?"s":""}">${noteIcon(9)} ${fl.notes}</span>` : ""}</span>`
         : "";
-      cells += `<button type="button" class="mp-cell created${sel}" data-month="${key}">${badges}<span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
+      cells += `<button type="button" class="mp-cell created${sel}" data-month="${gpEsc(key)}">${badges}<span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
     } else {
       cells += `<button type="button" class="mp-cell empty" data-newmonth="${m}" title="${MONTHS_ALL[m]} ${year} \u2014 Ajouter ce mois"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-plus">+</span></button>`;
     }
@@ -1174,7 +1238,7 @@ function renderTable() {
     const baseDay = baseDayNumber(r.day);
     const noteVal = rowNote(r);
     if (noteVal) noteCount++;
-    const noteBtn = `<button class="row-action note-btn${noteVal ? " note-on" : ""}" data-action="note" data-idx="${i}" title="${noteVal ? noteVal.replace(/"/g, "&quot;") : "Ajouter un commentaire"}">${noteIcon(12)}</button>`;
+    const noteBtn = `<button class="row-action note-btn${noteVal ? " note-on" : ""}" data-action="note" data-idx="${i}" title="${noteVal ? gpEsc(noteVal) : "Ajouter un commentaire"}">${noteIcon(12)}</button>`;
     const actionCell = isBis
       ? `<td class="action-cell">${noteBtn}<button class="row-action remove" data-action="remove" data-idx="${i}" title="Supprimer cette garde">×</button></td>`
       : isInvalid
@@ -1186,13 +1250,13 @@ function renderTable() {
     const holidayTag = holiday ? `<span class="day-holiday" title="${holiday}" aria-label="Jour férié : ${holiday}"></span>` : "";
     const dstInfo = getDSTInfo(m, year, r.day, isPrev, r.debut, r.fin);
     const dstTag = dstInfo ? `<span class="day-dst" title="Changement d'heure ce jour : ${dstInfo.label}">🕐 ${dstInfo.label}</span>` : "";
-    const noteTag = noteVal ? `<span class="day-note" title="${noteVal.replace(/"/g, "&quot;")}"></span>` : "";
+    const noteTag = noteVal ? `<span class="day-note" title="${gpEsc(noteVal)}"></span>` : "";
 
     return `
       <tr class="${classes}" data-idx="${i}">
-        <td><div class="day-cell"><span class="day-num">${r.day}</span>${wdLabel ? `<span class="day-wd">${wdLabel}</span>` : ''}${prevTag}${invalidTag}${holidayTag}${noteTag}${dstTag}</div></td>
-        <td><input class="cell-input" type="number" step="0.25" data-field="debut" value="${r.debut ?? ''}" placeholder="—"></td>
-        <td><input class="cell-input" type="number" step="0.25" data-field="fin"   value="${r.fin   ?? ''}" placeholder="—"></td>
+        <td><div class="day-cell"><span class="day-num">${gpEsc(r.day)}</span>${wdLabel ? `<span class="day-wd">${wdLabel}</span>` : ''}${prevTag}${invalidTag}${holidayTag}${noteTag}${dstTag}</div></td>
+        <td><input class="cell-input" type="number" step="0.25" data-field="debut" value="${gpEsc(r.debut ?? '')}" placeholder="—"></td>
+        <td><input class="cell-input" type="number" step="0.25" data-field="fin"   value="${gpEsc(r.fin   ?? '')}" placeholder="—"></td>
         <td class="${r.heures ? 'has-value':''} ${warnClass}"><input class="cell-input computed" type="text" data-field="heures" value="${fmt(r.heures)}" placeholder="—" readonly title="${warnTitle || "Calculé automatiquement depuis Début et Fin"}"></td>
         <td class="col-nuit ${r.nuit?'has-value':''}"><input class="cell-input computed" type="text" data-field="nuit"     value="${fmt(r.nuit)}"     placeholder="—" readonly title="Calculé automatiquement"></td>
         <td class="col-jour ${r.jour?'has-value':''}"><input class="cell-input computed" type="text" data-field="jour"     value="${fmt(r.jour)}"     placeholder="—" readonly title="Calculé automatiquement (Heures − Nuit)"></td>
@@ -1296,8 +1360,8 @@ function renderVerify() {
     if (it.kind === "note") {
       return `
       <button class="verify-item is-note" data-idx="${it.idx}" type="button">
-        <div class="v-day">${it.r.day} <span class="wd">${it.wdLabel}</span></div>
-        <div class="v-detail"><span class="v-comment">${noteIcon(12)} « ${it.note.replace(/</g, "&lt;")} »</span></div>
+        <div class="v-day">${gpEsc(it.r.day)} <span class="wd">${it.wdLabel}</span></div>
+        <div class="v-detail"><span class="v-comment">${noteIcon(12)} « ${gpEsc(it.note)} »</span></div>
         <div class="v-arrow">›</div>
       </button>
       `;
@@ -1312,7 +1376,7 @@ function renderVerify() {
     const desc = describeIssues(it.issues, r);
     return `
       <button class="verify-item" data-idx="${it.idx}" type="button">
-        <div class="v-day">${r.day} <span class="wd">${it.wdLabel}</span></div>
+        <div class="v-day">${gpEsc(r.day)} <span class="wd">${it.wdLabel}</span></div>
         <div class="v-detail">
           <span style="color:var(--color-primary)">${warnIcon(12)}</span> ${detailParts.join(" · ")}
           <br><span class="v-note">${desc}</span>
@@ -1567,7 +1631,7 @@ function makeExternalTooltip(list, maxIdx, minIdx) {
       tooltipEl.innerHTML = `
         <div class="ctt-head">
           <div>
-            <div class="ctt-month">${realMonthName(m)} ${yearStr}</div>
+            <div class="ctt-month">${gpEsc(realMonthName(m))} ${gpEsc(yearStr)}</div>
             <div class="ctt-gardes">${t.workedDays} ${t.workedDays > 1 ? "gardes" : "garde"}</div>
           </div>
           <div class="ctt-head-right">
@@ -1640,7 +1704,7 @@ function renderInsights() {
   const total = totalsForMonths(list);
 
   if (all.length === 0) {
-    document.getElementById("insights").innerHTML = `<div class="insight-item"><div class="idetail">Aucun mois pour ${state.activeYear} — ajoutes-en un.</div></div>`;
+    document.getElementById("insights").innerHTML = `<div class="insight-item"><div class="idetail">Aucun mois pour ${gpEsc(state.activeYear)} — ajoutes-en un.</div></div>`;
     return;
   }
 
@@ -1660,11 +1724,11 @@ function renderInsights() {
     <div class="insight-cards">
       <div class="insight-card low">
         <div class="icard-label">Mois le + calme</div>
-        <div class="icard-value">${realMonthName(minMonth.m)} · ${fmtNum(minMonth.t.heures)} h</div>
+        <div class="icard-value">${gpEsc(realMonthName(minMonth.m))} · ${fmtNum(minMonth.t.heures)} h</div>
       </div>
       <div class="insight-card peak">
         <div class="icard-label">Mois le + chargé</div>
-        <div class="icard-value">${realMonthName(maxMonth.m)} · ${fmtNum(maxMonth.t.heures)} h</div>
+        <div class="icard-value">${gpEsc(realMonthName(maxMonth.m))} · ${fmtNum(maxMonth.t.heures)} h</div>
       </div>
     </div>
     <div class="insight-bar">
@@ -1675,7 +1739,7 @@ function renderInsights() {
       <div class="insight-bar-track">
         <div class="insight-bar-fill wk" style="width: ${pctWeekends}%"></div>
       </div>
-      <div class="insight-bar-sub">soit ${pctWeekends.toFixed(0)} % des weekends ${act.bound ? `du 1er janvier au ${fmtDayMonth(act.bound)}` : `de ${state.activeYear}`}</div>
+      <div class="insight-bar-sub">soit ${pctWeekends.toFixed(0)} % des weekends ${act.bound ? `du 1er janvier au ${fmtDayMonth(act.bound)}` : `de ${gpEsc(state.activeYear)}`}</div>
     </div>
     <div class="insight-bar">
       <div class="insight-bar-head">
@@ -1685,7 +1749,7 @@ function renderInsights() {
       <div class="insight-bar-track">
         <div class="insight-bar-fill ho" style="width: ${pctFeries}%"></div>
       </div>
-      <div class="insight-bar-sub">soit ${pctFeries.toFixed(0)} % des fériés ${act.bound ? `du 1er janvier au ${fmtDayMonth(act.bound)}` : `de ${state.activeYear}`}</div>
+      <div class="insight-bar-sub">soit ${pctFeries.toFixed(0)} % des fériés ${act.bound ? `du 1er janvier au ${fmtDayMonth(act.bound)}` : `de ${gpEsc(state.activeYear)}`}</div>
     </div>
   `;
 }
@@ -1774,7 +1838,7 @@ function makeYearlyTooltip(data, maxIdx, minIdx, metric) {
       el.innerHTML = `
         <div class="ctt-head" style="margin-bottom:0">
           <div>
-            <div class="ctt-month">${d.fullLabel}</div>
+            <div class="ctt-month">${gpEsc(d.fullLabel)}</div>
             <div class="ctt-gardes">${d.t.workedDays} ${d.t.workedDays > 1 ? "gardes" : "garde"} · moy. ${ychValue(d, "moy")} h</div>
           </div>
           <div class="ctt-head-right">
@@ -2274,6 +2338,15 @@ async function importJSON(file) {
       }
     }
 
+    // Contrôle de forme : un fichier qui sort des formes produites par l'appli est refusé en entier.
+    const problemes = decompteProblems(imported);
+    if (problemes.length) {
+      const extrait = problemes.slice(0, 3).join("\n- ") + (problemes.length > 3 ? `\n(et ${problemes.length - 3} autre${problemes.length > 4 ? "s" : ""})` : "");
+      alert(`Fichier refusé : certaines valeurs ne sont pas au format attendu.\n- ${extrait}\n\nAucune donnée n'a été modifiée.`);
+      return;
+    }
+    imported.order = imported.order.filter(k => imported.data[k]);
+
     // Comptage pour confirmation
     const monthsCount = Object.keys(imported.data).length;
     const rowsCount = Object.values(imported.data).reduce((s, r) => s + (Array.isArray(r) ? r.length : 0), 0);
@@ -2363,104 +2436,6 @@ async function performReset() {
 }
 
 // ============ INIT ============
-/* ===== Sélecteur mois/année (essai) — branché sur les données réelles ===== */
-let mpPickerYear = null;
-let mpOpen = false;
-function mpMonthKeyFor(year, monthIdx) {
-  return Object.keys(state.data).find(k => realMonthName(k) === MONTHS_ALL[monthIdx] && yearOf(k) === year) || null;
-}
-function mpRenderPopover() {
-  const pop = document.getElementById('mpPopover'); if (!pop) return;
-  const y = mpPickerYear;
-  let cells = '';
-  for (let m = 0; m < 12; m++) {
-    const key = mpMonthKeyFor(y, m);
-    const abbr = MONTHS_ALL[m].slice(0, 4);
-    if (key) {
-      const t = monthTotals(key);
-      const sel = key === state.active ? ' sel' : '';
-      const segs = CATS.map(c => { const v = t[c.key] || 0; const pct = t.heures > 0 ? (v / t.heures) * 100 : 0; return `<span style="width:${pct}%;background:${c.color}"></span>`; }).join('');
-      cells += `<button type="button" class="mp-cell created${sel}" data-mpkey="${key}"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-h">${fmtNum(t.heures)}<i>h</i></span><span class="mp-cell-g">${t.workedDays} gardes</span><span class="mp-cell-bar">${segs}</span></button>`;
-    } else {
-      cells += `<button type="button" class="mp-cell empty" data-mpnew="${m}" title="${MONTHS_ALL[m]} ${y} — Cliquer pour créer"><span class="mp-cell-m">${abbr}</span><span class="mp-cell-plus">+</span></button>`;
-    }
-  }
-  pop.innerHTML = `<div class="mp-yearnav"><button type="button" class="mp-ynav" data-mpyear="-1" aria-label="Année précédente">‹</button><div class="mp-year">${y}</div><button type="button" class="mp-ynav" data-mpyear="1" aria-label="Année suivante">›</button></div><div class="mp-grid">${cells}</div><div class="mp-legend"><span><span class="mp-lg-box created"></span>Mois saisi</span><span><span class="mp-lg-box empty"></span>Cliquer pour créer</span></div>`;
-  mpPosition();
-}
-function mpPosition() {
-  const pop = document.getElementById('mpPopover');
-  const btn = document.getElementById('mpBtn');
-  if (!pop || pop.hidden || !btn) return;
-  const m = 8;
-  const vw = document.documentElement.clientWidth;
-  const w = Math.min(360, vw - 2 * m);
-  pop.style.width = w + 'px';
-  const br = btn.getBoundingClientRect();
-  let left = Math.round(br.right - w);
-  left = Math.max(m, Math.min(left, vw - w - m));
-  pop.style.position = 'fixed';
-  pop.style.left = left + 'px';
-  pop.style.top = Math.round(br.bottom + 6) + 'px';
-  pop.style.right = 'auto';
-}
-function renderMonthPickerTrial() {
-  const labelEl = document.getElementById('mpLabel'); if (!labelEl) return;
-  const cur = state.active;
-  let full, short;
-  if (cur) {
-    const y = yearOf(cur) || state.activeYear || '';
-    const name = realMonthName(cur);
-    const mi = MONTHS_ALL.indexOf(name);
-    const mm = mi >= 0 ? String(mi + 1).padStart(2, '0') : '';
-    full = name + ' ' + y;
-    short = (mm ? mm + '/' : '') + y;
-  } else {
-    full = '' + (state.activeYear || new Date().getFullYear());
-    short = full;
-  }
-  labelEl.innerHTML = '<span class="mp-label-full">' + full + '</span><span class="mp-label-short">' + short + '</span>';
-  if (mpPickerYear == null) mpPickerYear = state.activeYear || new Date().getFullYear();
-  if (mpOpen) mpRenderPopover();
-}
-function mpStepMonth(dir) {
-  const keys = sortedMonths();
-  if (!keys.length) return;
-  const i = keys.indexOf(state.active);
-  if (i < 0) { selectMonth(keys[0]); return; }
-  const j = i + dir;
-  if (j >= 0 && j < keys.length) selectMonth(keys[j]);
-}
-function mpInit() {
-  const btn = document.getElementById('mpBtn'); if (!btn) return;
-  const pop = document.getElementById('mpPopover');
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    mpOpen = !mpOpen;
-    if (mpOpen) { mpPickerYear = state.activeYear || mpPickerYear || new Date().getFullYear(); pop.hidden = false; mpRenderPopover(); }
-    else { pop.hidden = true; }
-  });
-  document.addEventListener('click', e => {
-    if (mpOpen && pop && !e.target.closest('#mpWrap')) { mpOpen = false; pop.hidden = true; }
-  });
-  pop.addEventListener('click', e => {
-    e.stopPropagation(); // évite que le gestionnaire « clic extérieur » ne ferme la popup
-    const yn = e.target.closest('[data-mpyear]');
-    if (yn) {
-      // On feuillette uniquement le calendrier ; l'application ne bouge qu'au clic sur un mois.
-      mpPickerYear += parseInt(yn.dataset.mpyear, 10);
-      mpRenderPopover();
-      return;
-    }
-    const cell = e.target.closest('[data-mpkey]');
-    if (cell) { mpOpen = false; pop.hidden = true; selectMonth(cell.dataset.mpkey); return; }
-    const neu = e.target.closest('[data-mpnew]');
-    if (neu) { mpOpen = false; pop.hidden = true; openAddMonthModal(); return; }
-  });
-  document.getElementById('mpPrev').addEventListener('click', () => mpStepMonth(-1));
-  document.getElementById('mpNext').addEventListener('click', () => mpStepMonth(1));
-}
-mpInit();
 
 function renderAll() {
   renderYearPills();
@@ -2513,8 +2488,8 @@ function renderYearlySummary() {
     const isActive = y === state.activeYear ? "active-year" : "";
 
     return `
-      <tr class="${isActive}" data-go-year="${y}">
-        <td>${y}</td>
+      <tr class="${isActive}" data-go-year="${gpEsc(y)}">
+        <td>${gpEsc(y)}</td>
         <td><span class="cell-val">${monthsOfY.length}</span>${deltaMois}</td>
         <td><span class="cell-val">${t.workedDays}</span>${deltaGardes}</td>
         <td><span class="cell-val">${fmtNum(t.heures)} h</span>${deltaHeures}</td>

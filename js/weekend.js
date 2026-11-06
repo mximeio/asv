@@ -39,7 +39,7 @@ function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>
 function postColor(name){
   const k=norm(name); if(!k) return null;
   const list=(state.posts&&Array.isArray(state.posts))?state.posts:DEFAULT_POSTS;
-  for(const p of list){ if(norm(p.name)===k && Number.isInteger(p.color)) return p.color; }
+  for(const p of list){ if(norm(p.name)===k && Number.isInteger(p.color) && p.color>=0 && p.color<PALETTE.length) return p.color; }
   return null;
 }
 function colorIdx(seg){
@@ -92,13 +92,13 @@ const ICONS={
 };
 function btnHTML(ic,label){return ICONS[ic]+'<span>'+label+'</span>';}
 
-function load(){try{const r=localStorage.getItem(KEY);state=r?JSON.parse(r):structuredClone(EMPTY);}catch(e){state=structuredClone(EMPTY);}}
+function load(){try{const r=localStorage.getItem(KEY);state=r?JSON.parse(r):structuredClone(EMPTY);}catch(e){state=structuredClone(EMPTY);}if(!isValidState(state))state=structuredClone(EMPTY);}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 function save(){
   persist();
   pushCloud(false);
 }
-function esc(t){return (t||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
+function esc(t){return String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 
 function activeAt(asv,h){
   return asv.segs.filter(s=>h>=s.s && h<s.e);
@@ -310,7 +310,19 @@ function exportJSON(){
   document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   setSync('synced');
 }
-function isValidState(d){return d && Array.isArray(d.asvs) && d.asvs.every(a=>a && typeof a.name==='string' && Array.isArray(a.segs));}
+/* Securite (06/11/2026) : un planning recu (Firestore, import, copie locale) est controle en
+   entier. Une couleur hors palette ou une note qui n'est pas du texte faisait planter le rendu ;
+   enregistre en local avant l'affichage, il replantait a chaque ouverture. */
+function okColor(c){return c==null||(Number.isInteger(c)&&c>=0&&c<PALETTE.length);}
+function okSeg(s){return !!s&&typeof s==='object'&&(s.post==null||typeof s.post==='string')&&(s.note==null||typeof s.note==='string')&&okColor(s.color)&&Number.isFinite(s.s)&&Number.isFinite(s.e);}
+function isValidState(d){
+  if(!d||typeof d!=='object'||!Array.isArray(d.asvs))return false;
+  if(d.date!=null&&typeof d.date!=='string')return false;
+  if(!d.asvs.every(a=>a&&typeof a.name==='string'&&Array.isArray(a.segs)&&a.segs.every(okSeg)))return false;
+  if(d.posts!=null&&!(Array.isArray(d.posts)&&d.posts.every(p=>p&&typeof p.name==='string'&&okColor(p.color))))return false;
+  return true;
+}
+function signalIllisible(){if(typeof toastError==='function')toastError("⚠ Planning reçu illisible : la version précédente est conservée.");}
 function importJSON(file){
   const reader=new FileReader();
   reader.onload=()=>{
@@ -342,6 +354,9 @@ if(wkMenuBtn && wkMenu){
   // tout clic sur un élément du menu referme le menu
   wkMenu.addEventListener('click',e=>{ if(e.target.closest('.actions-item')) closeActionsMenu(); });
 }
+// Imprimer : branché ici et non par onclick="…" dans le HTML, que la CSP bloquerait.
+const printBtn=document.getElementById('printBtn');
+if(printBtn) printBtn.addEventListener('click',()=>window.print());
 const wkLogout=document.getElementById('wkLogout');
 if(wkLogout) wkLogout.addEventListener('click',()=>{ if(!confirm('Se déconnecter ?'))return; try{ firebase.auth().signOut(); }catch(_){} });
 function wkSetUser(){ const u=firebase.auth().currentUser; const el=document.getElementById('wkMenuUser'); if(u && el){ el.textContent=u.email||'—'; el.title=u.email||''; } }
@@ -372,7 +387,7 @@ function subscribeCloud(){
     if(snap.metadata.hasPendingWrites)return;
     if(!snap.exists){ state=structuredClone(SEED); persist(); renderAll(); pushCloud(true); setSync('synced'); return; }
     const remote=snap.data()&&snap.data().data;
-    if(!isValidState(remote)){ setSync('synced'); return; }
+    if(!isValidState(remote)){ signalIllisible(); setSync('synced'); return; }
     if(JSON.stringify(remote)===JSON.stringify(state)){ setSync('synced'); return; }
     applyRemote(remote); setSync('synced');
   },err=>{ console.error('Abonnement cloud',err); setSync('offline'); });

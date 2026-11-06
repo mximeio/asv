@@ -45,7 +45,8 @@ Application/
 
 Les fonctionnalités sensibles s'activent par utilisateur via un document
 Firestore `access/{uid}` créé à la main : champ `weekend` pour le planning,
-champ `agenda` pour le préremplissage Google.
+champ `agenda` pour le préremplissage Google, champ `decompte` pour afficher ou
+masquer l'onglet Décompte (affiché s'il est absent).
 
 <details>
 <summary><b>Règles Firestore à publier</b></summary>
